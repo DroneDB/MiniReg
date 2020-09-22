@@ -12,7 +12,7 @@ A minimal toy implementation of the [DroneDB Registry API](https://github.com/Dr
 
 ## Endpoints
 
-  - [x] `POST /users/authenticate`
+  - [x] `POST /users/authenticate` (default `username`: admin, `password`: password)
   - [ ] `POST /share/init`
   - [ ] `POST /share/upload/<token>`
   - [ ] `POST /share/commit/<token>`  
