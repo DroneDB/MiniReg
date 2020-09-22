@@ -2,6 +2,21 @@
 
 A minimal toy implementation of the [DroneDB Registry API](https://github.com/DroneDB/Registry) written in NodeJS.
 
+## Running
+
+```
+# git clone https://github.com/DroneDB/MiniReg && cd MiniReg
+# npm install
+# node index.js
+```
+
+## Endpoints
+
+  - [x] `POST /users/authenticate`
+  - [ ] `POST /share/init`
+  - [ ] `POST /share/upload/<token>`
+  - [ ] `POST /share/commit/<token>`  
+
 ## Contributing
 
 Make a pull request for small contributions. For big contributions, please open a discussion first.
