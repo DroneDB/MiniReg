@@ -29,13 +29,13 @@ let server;
 
 app.post('/share/init', jwtAuth, share.assignUUID, formDataParser, share.handleInit);
 app.post('/share/upload/:uuid', jwtAuth, share.getUUID, share.preUpload, share.uploadFile, share.handleUpload);
-// app.post('/share/commit/:uuid', share.getUUID, share.handleCommit, share.createTask);
+//app.post('/share/commit/:uuid', share.getUUID, share.handleCommit, share.createTask);
 
 app.post('/users/authenticate', formDataParser, (req, res) => {
     try{
         res.json({token: users.login(req.body.username, req.body.password)});
     }catch(e){
-        res.json({error: e.message});
+        res.status(401).json({error: e.message});
     }
 });
 
@@ -44,7 +44,7 @@ app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
       res.status(401).json({error: "Unauthorized"});
     }else{
-      res.json({error: err.message});
+      res.status(500).json({error: err.message});
     }
 });
 

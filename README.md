@@ -5,7 +5,7 @@ A minimal toy implementation of the [DroneDB Registry API](https://github.com/Dr
 ## Running
 
 ```
-# git clone https://github.com/DroneDB/MiniReg && cd MiniReg
+# git clone https://github.com/DroneDB/MiniReg --recurse-submodules && cd MiniReg
 # npm install
 # node index.js
 ```

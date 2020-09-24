@@ -7,6 +7,7 @@ const rmdir = require('rimraf');
 const Directories = require('./Directories');
 const mv = require('mv');
 const async = require('async');
+const ddb = require('ddb');
 
 const removeDirectory = function(dir, cb = () => {}){
     fs.stat(dir, (err, stats) => {
@@ -65,13 +66,13 @@ module.exports = {
 
     getUUID: (req, res, next) => {
         req.id = req.params.uuid;
-        if (!req.id) res.json({error: `Invalid uuid (not set)`});
+        if (!req.id) res.status(400).json({error: `Invalid uuid (not set)`});
 
         const srcPath = path.join("tmp", req.id);
         const bodyFile = path.join(srcPath, "body.json");
 
         fs.access(bodyFile, fs.F_OK, err => {
-            if (err) res.json({error: `Invalid uuid (not found)`});
+            if (err) res.status(400).json({error: `Invalid uuid (not found)`});
             else next();
         });
     },
@@ -92,11 +93,10 @@ module.exports = {
     uploadFile: upload.array("file"),
 
     handleUpload: (req, res) => {
-        // IMPROVEMENT: check files count limits ahead of handleTaskNew
-        if (req.files && req.files.length > 0){
+        if (req.files && req.files.length === 1){
             res.json({success: true});
         }else{
-            res.json({error: "Need at least 1 file."});
+            res.status(400).json({error: "Need to upload 1 file."});
         }
     },
 
@@ -123,7 +123,7 @@ module.exports = {
             },
             cb => fs.readdir(srcPath, cb),
         ], (err, [ body, files ]) => {
-            if (err) res.json({error: err.message});
+            if (err) res.status(400).json({error: err.message});
             else{
                 req.body = body;
                 req.files = files;
@@ -150,15 +150,6 @@ module.exports = {
 
         async.series([
             cb => {
-                // Check for problems before file uploads
-                if (req.body && req.body.options){
-                    odmInfo.filterOptions(req.body.options, err => {
-                        if (err) cb(err);
-                        else cb();
-                    });
-                }else cb();
-            },
-            cb => {
                 fs.stat(srcPath, (err, stat) => {
                     if (err && err.code === 'ENOENT') fs.mkdir(srcPath, undefined, cb);
                     else cb(); // Dir already exists
@@ -168,7 +159,8 @@ module.exports = {
                 fs.writeFile(bodyFile, JSON.stringify(req.body), {encoding: 'utf8'}, cb);
             },
             cb => {
-                // ddb init
+                ddb.init(srcPath).then(() => cb())
+                                 .catch(e => cb(e));
             },
             cb => {
                 res.json({token: req.id});
