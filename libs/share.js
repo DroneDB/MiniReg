@@ -16,44 +16,26 @@ const removeDirectory = function(dir, cb = () => {}){
     });
 };
 
-const assureUniqueFilename = (dstPath, filename, cb) => {
-    const dstFile = path.join(dstPath, filename);
-    fs.exists(dstFile, exists => {
-        if (!exists) cb(null, filename);
-        else{
-            const parts = filename.split(".");
-            if (parts.length > 1){
-                assureUniqueFilename(dstPath, 
-                    `${parts.slice(0, parts.length - 1).join(".")}_.${parts[parts.length - 1]}`, 
-                    cb);
-            }else{
-                // Filename without extension? Strange..
-                assureUniqueFilename(dstPath, filename + "_", cb);
-            }
-        }
-    });
-};
-
 const upload = multer({
     storage: multer.diskStorage({
         destination: (req, file, cb) => {
-            let dstPath = path.join("tmp", req.id);
-            fs.exists(dstPath, exists => {
+            const folderPath = path.join("tmp", req.id);
+
+            fs.exists(folderPath, exists => {
                 if (!exists) {
-                    fs.mkdir(dstPath, undefined, () => {
-                        cb(null, dstPath);
+                    fs.mkdir(folderPath, undefined, () => {
+                        cb(null, folderPath);
                     });
                 } else {
-                    cb(null, dstPath);
+                    cb(null, folderPath);
                 }
             });
         },
         filename: (req, file, cb) => {
-            let filename = file.originalname;
-            if (filename === "body.json") filename = "_body.json";
+            const filename = uuidv4();
+            req.tmpUploadFilePath = path.join("tmp", req.id, filename);
 
-            let dstPath = path.join("tmp", req.id);
-            assureUniqueFilename(dstPath, filename, cb);
+            cb(null, filename);
         }
     })
 });
@@ -69,9 +51,8 @@ module.exports = {
         if (!req.id) res.status(400).json({error: `Invalid uuid (not set)`});
 
         const srcPath = path.join("tmp", req.id);
-        const bodyFile = path.join(srcPath, "body.json");
 
-        fs.access(bodyFile, fs.F_OK, err => {
+        fs.access(srcPath, fs.F_OK, err => {
             if (err) res.status(400).json({error: `Invalid uuid (not found)`});
             else next();
         });
@@ -90,57 +71,89 @@ module.exports = {
         }
     },
 
-    uploadFile: upload.array("file"),
+    uploadFile: [upload.single("file"), (req, res, next) => {
+        if (!req.tmpUploadFilePath){
+            cb(new Error("Missing tmp upload file path"));
+            return;
+        }
+        if (!req.body.path){
+            cb(new Error("path field missing"));
+            return;
+        }
+
+        const ddbPath = path.join("tmp", req.id);
+        const filePath = path.join(ddbPath, req.body.path);
+        
+        // Path traversal check
+        if (filePath.indexOf(ddbPath) !== 0){
+            cb(new Error("Invalid path"));
+            return;
+        }
+        
+        const folderPath = path.dirname(filePath);
+
+        async.series([
+            cb => {
+                // Create dir
+                fs.exists(folderPath, exists => {
+                    if (!exists) {
+                        fs.mkdir(folderPath, {recursive: true}, () => {
+                            cb(null, folderPath);
+                        });
+                    } else {
+                        cb(null, folderPath);
+                    }
+                });
+            },
+
+            // TODO: remove from ddb index (allows re-uploads)
+
+            cb => fs.rename(req.tmpUploadFilePath, filePath, cb),
+            cb => {
+                req.filePath = filePath;
+                cb();
+            }
+        ], (err, _) => {
+            if (err) res.status(400).json({error: err.message});
+            else next();
+        });
+    }],
 
     handleUpload: (req, res) => {
-        if (req.files && req.files.length === 1){
-            res.json({success: true});
+        const ddbPath = path.join("tmp", req.id);
+
+        if (req.file){
+            ddb.add(ddbPath, req.filePath)
+                .then(entries => {
+                    const e = entries.find(e => !ddb.entry.isDirectory(e));
+                    if (e){
+                        res.json({
+                            hash: e.hash,
+                            size: e.size,
+                            path: e.path
+                        });
+                    }else{
+                        res.status(400).json({error: "Cannot add file (already added?)"});
+                    }
+                })
+                .catch(e => {
+                    res.status(400).json({error: e.message});
+                });
         }else{
             res.status(400).json({error: "Need to upload 1 file."});
         }
     },
 
-    handleCommit: (req, res, next) => {
+    handleCommit: (req, res) => {
         const srcPath = path.join("tmp", req.id);
-        const bodyFile = path.join(srcPath, "body.json");
 
-        async.series([
-            cb => {
-                fs.readFile(bodyFile, 'utf8', (err, data) => {
-                    if (err) cb(err);
-                    else{
-                        try{
-                            const body = JSON.parse(data);
-                            fs.unlink(bodyFile, err => {
-                                if (err) cb(err);
-                                else cb(null, body);
-                            });
-                        }catch(e){
-                            cb(new Error("Malformed body.json"));
-                        }
-                    }
-                });
-            },
-            cb => fs.readdir(srcPath, cb),
-        ], (err, [ body, files ]) => {
-            if (err) res.status(400).json({error: err.message});
-            else{
-                req.body = body;
-                req.files = files;
-
-                if (req.files.length === 0){
-                    req.error = "Need at least 1 file.";
-                }
-                next();
-            }
-        });
+        
     },
 
     handleInit: (req, res) => {
         req.body = req.body || {};
         
         const srcPath = path.join("tmp", req.id);
-        const bodyFile = path.join(srcPath, "body.json");
 
         // Print error message and cleanup
         const die = (error) => {

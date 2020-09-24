@@ -29,7 +29,7 @@ let server;
 
 app.post('/share/init', jwtAuth, share.assignUUID, formDataParser, share.handleInit);
 app.post('/share/upload/:uuid', jwtAuth, share.getUUID, share.preUpload, share.uploadFile, share.handleUpload);
-//app.post('/share/commit/:uuid', share.getUUID, share.handleCommit, share.createTask);
+app.post('/share/commit/:uuid', share.getUUID, share.handleCommit);
 
 app.post('/users/authenticate', formDataParser, (req, res) => {
     try{
