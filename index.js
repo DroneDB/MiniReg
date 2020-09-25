@@ -21,17 +21,15 @@ const share = require('./libs/share');
 
 app.use(express.static('public'));
 
-const formDataParser = multer().none();
 const urlEncodedBodyParser = bodyParser.urlencoded({extended: false});
-const jsonBodyParser = bodyParser.json();
 
 let server;
 
-app.post('/share/init', jwtAuth, share.assignUUID, formDataParser, share.handleInit);
+app.post('/share/init', jwtAuth, share.assignUUID, urlEncodedBodyParser, share.handleInit);
 app.post('/share/upload/:uuid', jwtAuth, share.getUUID, share.preUpload, share.uploadFile, share.handleUpload);
 app.post('/share/commit/:uuid', share.getUUID, share.handleCommit);
 
-app.post('/users/authenticate', formDataParser, (req, res) => {
+app.post('/users/authenticate', urlEncodedBodyParser, (req, res) => {
     try{
         res.json({token: users.login(req.body.username, req.body.password)});
     }catch(e){

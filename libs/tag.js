@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const PUBLIC_ORG_NAME = "public";
 
 module.exports = {
+    PUBLIC_ORG_NAME,
     parseOrCreateTag: function(tag){
         if (!tag){
             return {

@@ -217,6 +217,14 @@ module.exports = {
             removeDirectory(srcPath);
         };
 
+        const t = tag.parseOrCreateTag(req.body.tag);
+        
+        // Check that we can create a dataset under the requested org
+        if (t.organization !== req.user.username && t.organization !== t.PUBLIC_ORG_NAME){
+            res.status(401).json({error: `You're not authorized to upload to this organization.`});
+            return;
+        }
+
         async.series([
             cb => {
                 fs.stat(srcPath, (err, stat) => {
