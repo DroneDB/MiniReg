@@ -7,6 +7,7 @@ const rmdir = require('rimraf');
 const Directories = require('./Directories');
 const mv = require('mv');
 const async = require('async');
+const tag = require('./tag');
 const ddb = require('ddb');
 
 const removeDirectory = function(dir, cb = () => {}){
@@ -51,9 +52,10 @@ module.exports = {
         if (!req.id) res.status(400).json({error: `Invalid uuid (not set)`});
 
         const srcPath = path.join("tmp", req.id);
+        const bodyFile = path.join(srcPath, "__body.json");
 
-        fs.access(srcPath, fs.F_OK, err => {
-            if (err) res.status(400).json({error: `Invalid uuid (not found)`});
+        fs.access(bodyFile, fs.F_OK, err => {
+            if (err) res.json({error: `Invalid uuid (not found)`});
             else next();
         });
     },
@@ -78,6 +80,11 @@ module.exports = {
         }
         if (!req.body.path){
             cb(new Error("path field missing"));
+            return;
+        }
+
+        if (!req.body.path === "__body.json"){
+            cb(new Error("invalid path"));
             return;
         }
 
@@ -108,7 +115,7 @@ module.exports = {
 
             // TODO: remove from ddb index (allows re-uploads)
 
-            cb => fs.rename(req.tmpUploadFilePath, filePath, cb),
+            cb => mv(req.tmpUploadFilePath, filePath, cb),
             cb => {
                 req.filePath = filePath;
                 cb();
@@ -146,14 +153,63 @@ module.exports = {
 
     handleCommit: (req, res) => {
         const srcPath = path.join("tmp", req.id);
-
+        const bodyFile = path.join(srcPath, "__body.json");
         
+        let body = {};
+        let tagComp = null;
+        let destDir = null;
+
+        async.series([
+            cb => {
+                fs.readFile(bodyFile, 'utf8', (err, data) => {
+                    if (err) cb(err);
+                    else{
+                        try{
+                            body = JSON.parse(data);
+                            fs.unlink(bodyFile, err => {
+                                if (err) cb(err);
+                                else cb(null, body);
+                            });
+                        }catch(e){
+                            cb(new Error("Malformed __body.json"));
+                        }
+                    }
+                });
+            },
+
+            cb => {
+                tagComp = tag.parseOrCreateTag(body.tag);
+                destDir = path.join(Directories.ddbData, tagComp.organization, tagComp.dataset)
+
+                fs.stat(destDir, (err, stat) => {
+                    if (err && err.code === 'ENOENT') fs.mkdir(destDir, {recursive: true}, cb);
+                    else{
+                        // Dir already exist, remove it
+                        rmdir(destDir, err => {
+                            if (err) cb(err);
+                            else fs.mkdir(destDir, {recursive: true}, cb);
+                        });
+                    }
+                });
+            }
+        ], (err) => {
+            if (err){
+                res.status(400).json({error: err.message});
+                return;
+            }
+
+            mv(srcPath, destDir, err => {
+                if (err) res.status(400).json({error: err.message});
+                else res.json({url: `/r/${tagComp.organization}/${tagComp.dataset}`});
+            });
+        });
     },
 
     handleInit: (req, res) => {
         req.body = req.body || {};
         
         const srcPath = path.join("tmp", req.id);
+        const bodyFile = path.join(srcPath, "__body.json");
 
         // Print error message and cleanup
         const die = (error) => {
@@ -182,60 +238,5 @@ module.exports = {
         ],  err => {
             if (err) die(err.message);
         });
-    },
-
-    createTask: (req, res) => {
-        // IMPROVEMENT: consider doing the file moving in the background
-        // and return a response more quickly instead of a long timeout.
-        req.setTimeout(1000 * 60 * 20);
-
-        const srcPath = path.join("tmp", req.id);
-
-        // Print error message and cleanup
-        const die = (error) => {
-            res.json({error});
-            removeDirectory(srcPath);
-        };
-
-        if (req.error !== undefined){
-            die(req.error);
-        }else{
-            let destPath = path.join(Directories.data, req.id);
-
-            async.series([
-                // Check if dest directory already exists
-                cb => {
-                    if (req.files && req.files.length > 0) {
-                        fs.stat(destPath, (err, stat) => {
-                            if (err && err.code === 'ENOENT') cb();
-                            else{
-                                // Directory already exists, try to remove it
-                                removeDirectory(destPath, err => {
-                                    if (err) cb(new Error(`Directory exists and we couldn't remove it.`));
-                                    else cb();
-                                });
-                            } 
-                        });
-                    } else {
-                        cb();
-                    }
-                },
-
-
-                // Move all uploads to data/<uuid>/images dir (if any)
-                cb => mv(srcPath, destPath, cb),
-                
-
-                // Create task
-                cb => {
-                    // console.log(req.body);
-
-                    // TODO: ddb init
-
-                }
-            ], err => {
-                if (err) die(err.message);
-            });
-        }
     }
 }
