@@ -19,7 +19,7 @@ const { jwtAuth } = require('./libs/jwt');
 
 const share = require('./libs/share');
 
-app.use(express.static('public'));
+app.use(express.static('webapp/public'));
 
 const urlEncodedBodyParser = bodyParser.urlencoded({extended: false});
 
