@@ -1,4 +1,5 @@
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const LiveReloadPlugin = require('webpack-livereload-plugin');
 const path = require('path');
 
 module.exports = {
@@ -61,8 +62,16 @@ module.exports = {
         ]
     },
     plugins: [
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new LiveReloadPlugin()
     ],
+
+    resolve: {
+        alias: {
+            'vue$': 'vue/dist/vue.esm.js'
+        },
+        extensions: ['*', '.js', '.vue', '.json']
+    },
 
     externals: {
         "ddb": "DDB"

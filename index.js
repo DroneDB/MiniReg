@@ -21,19 +21,29 @@ const share = require('./libs/share');
 
 app.use(express.static('webapp/public'));
 
-const urlEncodedBodyParser = bodyParser.urlencoded({extended: false});
+const formDataParser = [multer().none(), bodyParser.urlencoded({extended: false})];
 
 let server;
 
-app.post('/share/init', jwtAuth, share.assignUUID, urlEncodedBodyParser, share.handleInit);
+app.post('/share/init', jwtAuth, share.assignUUID, formDataParser, share.handleInit);
 app.post('/share/upload/:uuid', jwtAuth, share.getUUID, share.preUpload, share.uploadFile, share.handleUpload);
 app.post('/share/commit/:uuid', share.getUUID, share.handleCommit);
 
-app.post('/users/authenticate', urlEncodedBodyParser, (req, res) => {
+app.post('/users/authenticate', formDataParser, (req, res) => {
     try{
         res.json({token: users.login(req.body.username, req.body.password)});
     }catch(e){
         res.status(401).json({error: e.message});
+    }
+});
+
+// Not part of official API
+// just a convenience, redirect /r/ requests to Vue #/r/ router path
+app.get('/r/:org/:ds?', (req, res) => {
+    if (req.params.ds){
+        res.redirect(301, `/#/r/${req.params.org}/${req.params.ds}`);
+    }else{
+        res.redirect(301, `/#/r/${req.params.org}`);
     }
 });
 
