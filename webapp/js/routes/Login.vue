@@ -1,25 +1,31 @@
 <template>
 <div id="login">
     <div class="ui grid stackable">
-        <div class="six wide column"></div>
-        <div class="four wide column">
+        <div class="five wide column"></div>
+        <div class="six wide column">
             <img src="/images/logo.png" alt="Logo" class="logo" />
             <h2>Welcome Back</h2>
             <p>Sign in with your credentials</p>
-            <Message bindTo="error" />
-            <form class="ui form">
-                <div class="field">
-                    <label>Username</label>
-                    <input v-model="username" type="text" name="username" placeholder="">
+            <form class="ui large form">
+                <div class="ui segment">
+                    <div class="field" :class="{error: !!error}">
+                        <div class="ui left icon input">
+                            <i class="user icon"></i>
+                            <input v-model="username" type="text" name="username" placeholder="Username">
+                        </div>
+                    </div>
+                    <div class="field" :class="{error: !!error}">
+                        <div class="ui left icon input">
+                            <i class="lock icon"></i>
+                            <input v-model="password" type="password" name="password" placeholder="Password">
+                        </div>
+                    </div>
+                    <div @click="login" :class="{loading: loggingIn}" class="ui fluid large primary submit button">Login</div>
                 </div>
-                <div class="field">
-                    <label>Password</label>
-                    <input v-model="password" type="password" name="password" placeholder="">
-                </div>
-                <button :class="{loading: loggingIn}" class="ui button primary" type="submit" @click="login">Login</button>
             </form>
+            <Message bindTo="error" />
         </div>
-        <div class="six wide column"></div>
+        <div class="five wide column"></div>
     </div>
 </div>
 </template>
@@ -45,6 +51,7 @@ export default {
       login: async function(e){
         e.preventDefault();
         this.loggingIn = true;
+        this.error = "";
         
         const formData = new FormData();
         formData.append("username", this.username);
