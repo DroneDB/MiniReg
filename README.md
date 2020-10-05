@@ -13,9 +13,9 @@ A minimal toy implementation of the [DroneDB Registry API](https://github.com/Dr
 ## Endpoints
 
   - [x] `POST /users/authenticate` (default `username`: admin, `password`: password)
-  - [ ] `POST /share/init`
-  - [ ] `POST /share/upload/<token>`
-  - [ ] `POST /share/commit/<token>`  
+  - [x] `POST /share/init`
+  - [x] `POST /share/upload/<token>`
+  - [x] `POST /share/commit/<token>`  
 
 ## Contributing
 
