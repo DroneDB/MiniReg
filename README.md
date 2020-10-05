@@ -1,6 +1,6 @@
 # MiniReg
 
-A minimal toy implementation of the [DroneDB Registry API](https://github.com/DroneDB/Registry) written in NodeJS.
+A minimal, reference implementation of the [DroneDB Registry API](https://github.com/DroneDB/Registry) written in NodeJS.
 
 ## Running
 
