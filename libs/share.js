@@ -218,7 +218,12 @@ module.exports = {
         };
 
         const t = tag.parseOrCreateTag(req.body.tag);
-        
+
+        // Fill organization if missing
+        if (t.organization.trim() === ""){
+            t.organization = req.user.username;
+        }
+
         // Check that we can create a dataset under the requested org
         if (t.organization !== req.user.username && t.organization !== t.PUBLIC_ORG_NAME){
             res.status(401).json({error: `You're not authorized to upload to this organization.`});
@@ -233,6 +238,9 @@ module.exports = {
                 });
             },
             cb => {
+                // Update body tag
+                req.body.tag = tag.dump(t);
+
                 fs.writeFile(bodyFile, JSON.stringify(req.body), {encoding: 'utf8'}, cb);
             },
             cb => {
