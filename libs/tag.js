@@ -12,18 +12,30 @@ module.exports = {
             };
         }else{
             const parts = tag.split('/');
+            let t;
+
             // TODO: check for invalid characters?
             if (parts.length === 1){
-                return {
+                t = {
                     organization: PUBLIC_ORG_NAME,
                     dataset: parts[0]
                 };
             }else{
-                return {
+                t = {
                     organization: parts[parts.length - 2],
                     dataset: parts[parts.length - 1]
                 };
             }
+
+            if (t.dataset.trim() === ""){
+                t.dataset = uuidv4().replace(/-/g, ''); // Generate one
+            }
+
+            return t;
         }
+    },
+
+    dump: function(tag){
+        return `${tag.organization}/${tag.dataset}`;
     }
 };

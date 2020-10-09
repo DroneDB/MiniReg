@@ -200,7 +200,7 @@ module.exports = {
 
             mv(srcPath, destDir, err => {
                 if (err) res.status(400).json({error: err.message});
-                else res.json({url: `/r/${tagComp.organization}/${tagComp.dataset}`});
+                else res.json({url: `/r/${tagComp.organization}/${tagComp.dataset}`, tag: tag.dump(tagComp)});
             });
         });
     },
