@@ -8,7 +8,7 @@ const users = require('./libs/users');
 
 const logger = require('./libs/logger');
 const async = require('async');
-const mime = require('mime');
+const authProviders = require('./libs/authProviders');
 
 const express = require('express');
 const app = express();
@@ -16,7 +16,6 @@ const app = express();
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const { jwtAuth } = require('./libs/jwt');
-
 const share = require('./libs/share');
 
 app.use(express.static('webapp/public'));
@@ -29,9 +28,9 @@ app.post('/share/init', jwtAuth, share.assignUUID, formDataParser, share.handleI
 app.post('/share/upload/:uuid', jwtAuth, share.getUUID, share.preUpload, share.uploadFile, share.handleUpload);
 app.post('/share/commit/:uuid', jwtAuth, share.getUUID, share.handleCommit);
 
-app.post('/users/authenticate', formDataParser, (req, res) => {
+app.post('/users/authenticate', formDataParser, async (req, res) => {
     try{
-        res.json({token: users.login(req.body.username, req.body.password)});
+        res.json({token: await users.login(req.body.username, req.body.password)});
     }catch(e){
         res.status(401).json({error: e.message});
     }
@@ -84,6 +83,8 @@ logger.info(`${packageJson.name} ${packageJson.version} - ${packageJson.descript
 
 let commands = [
     cb => {
+        authProviders.initialize(config.auth, config.remoteAuth);
+
         users.createDefaultUsers();
         server = app.listen(config.port, err => {
             if (!err) logger.info('Server has started on port ' + String(config.port));

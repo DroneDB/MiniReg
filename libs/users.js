@@ -4,6 +4,7 @@ const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
 const jwt = require('./jwt');
+const authProviders = require('./authProviders');
 
 
 function generateSalt() {
@@ -27,13 +28,12 @@ module.exports = {
         db.prepare(`INSERT INTO users (username, salt, password) VALUES (?, ?, ?)`).run(username, salt, pwd);
     },
 
-    login: function(username, password){
-        let r = db.prepare("SELECT salt FROM users WHERE username = ?").get(username);
-        if (!r) throw new Error("Unauthorized");
+    login: async function(username, password){
+        const metadata = await authProviders.get().authenticate(username, password);
+        const signObj = {
+            username, metadata
+        };
 
-        r = db.prepare("SELECT username FROM users WHERE username = ? AND password = ?").get(username, crypto.createHmac('sha512', r.salt).update(password).digest("base64"));
-        if (!r) throw new Error("Unauthorized");
-
-        return jwt.sign(r);
+        return jwt.sign(signObj);
     }
 }

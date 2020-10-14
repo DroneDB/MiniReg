@@ -12,6 +12,8 @@ Options:
 	--config <path>	Path to the configuration file (default: config-default.json)	
 	-p, --port <number> 	Port to bind the server to (default: 3000)
 	--log-level <logLevel>	Set log level verbosity (default: info)
+	-a, --auth <provider>	Authentication provider to use. [local|remote] (default: local)
+	--remote-auth <url>	Remote authentication URL. (default: https://dronedb.app)
 	--cleanup-uploads-after <number> Number of minutes that elapse before deleting unfinished uploads. Set this value to the maximum time you expect a dataset to be uploaded. (default: 2880) 
 	--test Enable test mode. This can be useful during development or testing (default: false)
 	--test-drop-uploads	If test mode is enabled, drop /task/new/upload requests with 50% probability. (default: false)
@@ -54,6 +56,8 @@ config.logger.logDirectory = fromConfigFile("logger.logDirectory", ''); // Set t
 config.port = parseInt(argv.port || argv.p || fromConfigFile("port", process.env.PORT || 5000));
 config.cleanupUploadsAfter = parseInt(argv['cleanup-uploads-after'] || fromConfigFile("cleanupUploadsAfter", 2880));
 config.test = argv.test || fromConfigFile("test", false);
+config.auth = argv.auth || argv.a || fromConfigFile("auth", "local");
+config.remoteAuth = argv['remote-auth'] || fromConfigFile("remote-auth", "https://dronedb.app");
 config.testDropUploads = argv['test-drop-uploads'] || fromConfigFile("testDropUploads", false);
 config.powercycle = argv.powercycle || fromConfigFile("powercycle", false);
 
