@@ -27,7 +27,7 @@ let server;
 
 app.post('/share/init', jwtAuth, share.assignUUID, formDataParser, share.handleInit);
 app.post('/share/upload/:uuid', jwtAuth, share.getUUID, share.preUpload, share.uploadFile, share.handleUpload);
-app.post('/share/commit/:uuid', share.getUUID, share.handleCommit);
+app.post('/share/commit/:uuid', jwtAuth, share.getUUID, share.handleCommit);
 
 app.post('/users/authenticate', formDataParser, (req, res) => {
     try{
@@ -48,10 +48,10 @@ app.get('/r/:org/:ds?', (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    logger.error(err.stack);
     if (err.name === 'UnauthorizedError') {
-      res.status(401).json({error: "Unauthorized"});
+        res.status(401).json({error: "Unauthorized"});
     }else{
+      logger.error(err.stack);
       res.status(500).json({error: err.message});
     }
 });

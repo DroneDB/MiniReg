@@ -19,6 +19,6 @@ module.exports = {
     	else next();
     }],
     sign: function(data){
-        return jwt.sign(data, secret);
+        return jwt.sign(data, secret, { expiresIn: '6h' });
     }
 }

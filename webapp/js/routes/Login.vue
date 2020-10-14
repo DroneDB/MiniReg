@@ -16,7 +16,7 @@
                     </div>
                     <div class="field" :class="{error: !!error}">
                         <div class="ui left icon input">
-                            <i class="lock icon"></i>
+                            <i class="key icon"></i>
                             <input v-model="password" type="password" name="password" placeholder="Password">
                         </div>
                     </div>
