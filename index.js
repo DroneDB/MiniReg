@@ -5,6 +5,8 @@ const config = require('./config.js');
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 const db = require('./libs/db');
 const users = require('./libs/users');
+const exphbs = require('express-handlebars');
+const hbhelpers = require('./webapp/views/helpers/helpers');
 
 const logger = require('./libs/logger');
 const async = require('async');
@@ -17,6 +19,15 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const { jwtAuth } = require('./libs/jwt');
 const share = require('./libs/share');
+
+const hbs = exphbs.create({
+    helpers: hbhelpers,
+    extname: '.hbs'
+});
+app.engine('.hbs', hbs.engine);
+app.set('view engine', '.hbs');
+app.set('views', 'webapp/views');
+if (process.env.NODE_ENV === 'production') app.enable('view cache');
 
 app.use(express.static('webapp/public'));
 
@@ -37,13 +48,20 @@ app.post('/users/authenticate', formDataParser, async (req, res) => {
 });
 
 // Not part of official API
-// just a convenience, redirect /r/ requests to Vue #/r/ router path
+// These are views
 app.get('/r/:org/:ds?', (req, res) => {
     if (req.params.ds){
-        res.redirect(301, `/#/r/${req.params.org}/${req.params.ds}`);
+        res.render('dataset', { params: req.params });
     }else{
-        res.redirect(301, `/#/r/${req.params.org}`);
+        res.send("TODO");
+        // res.redirect(301, `/#/r/${req.params.org}`);
     }
+});
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+app.get('/', (req, res) => {
+    res.redirect(301, '/login');
 });
 
 app.use((err, req, res, next) => {

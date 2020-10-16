@@ -5,7 +5,11 @@ const path = require('path');
 module.exports = {
     mode: 'development',
     
-    entry: path.join(__dirname, './webapp/js/main.js'),
+    entry: {
+        main: path.join(__dirname, './webapp/js/main.js'),
+        dataset: path.join(__dirname, './webapp/js/dataset.js'),
+        login: path.join(__dirname, './webapp/js/login.js')
+    },
     
     output: {
         path: path.join(__dirname, './webapp/public/build/'),
@@ -68,6 +72,7 @@ module.exports = {
 
     resolve: {
         alias: {
+            'commonui': path.resolve(__dirname, 'webapp/vendor/commonui/'),
             'vue$': 'vue/dist/vue.esm.js'
         },
         extensions: ['*', '.js', '.vue', '.json']

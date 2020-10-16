@@ -3,21 +3,20 @@
     <div class="ui grid stackable">
         <div class="five wide column"></div>
         <div class="six wide column">
-            <img src="/images/logo.png" alt="Logo" class="logo" />
             <h2>Welcome Back</h2>
             <p>Sign in with your credentials</p>
             <form class="ui large form">
                 <div class="ui segment">
-                    <div class="field" :class="{error: !!error}">
+                    <div class="field">
                         <div class="ui left icon input">
                             <i class="user icon"></i>
-                            <input v-model="username" type="text" name="username" placeholder="Username">
+                            <input v-on:keyup.enter="login" v-model="username" autocomplete="off" type="text" name="username" placeholder="Username">
                         </div>
                     </div>
-                    <div class="field" :class="{error: !!error}">
+                    <div class="field">
                         <div class="ui left icon input">
                             <i class="key icon"></i>
-                            <input v-model="password" type="password" name="password" placeholder="Password">
+                            <input v-on:keyup.enter="login" v-model="password" type="password" name="password" placeholder="Password">
                         </div>
                     </div>
                     <div @click="login" :class="{loading: loggingIn}" class="ui fluid large primary submit button">Login</div>
@@ -32,7 +31,7 @@
 
 <script>
 import Message from 'commonui/components/Message.vue';
-import { setAuthToken } from '../auth';
+import { setCredentials, isLoggedIn, getUsername } from '../auth';
 
 export default {
   components: {
@@ -45,6 +44,11 @@ export default {
           loggingIn: false,
           username: "",
           password: ""
+      }
+  },
+  beforeMount: function(){
+      if (isLoggedIn()){
+          location.href = `/r/${getUsername()}`;
       }
   },
   methods: {
@@ -63,8 +67,10 @@ export default {
                 body: formData
             }).then(r => r.json());
             if (res.token){
-                setAuthToken(res.token);
-                this.$router.push({ path: '/r', param: { org: this.username } });
+                setCredentials(this.username, res.token);
+
+                // TODO: previous URL redirect to
+                window.location.href = `/r/${this.username}`;
             }else{
                 this.error = res.error || `Cannot login: ${JSON.stringify(res)}`;
             }

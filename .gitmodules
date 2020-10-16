@@ -1,3 +1,9 @@
 [submodule "ddb"]
 	path = ddb
 	url = https://github.com/DroneDB/DroneDB
+[submodule "vendor/ddb"]
+	path = vendor/ddb
+	url = https://github.com/DroneDB/DroneDB
+[submodule "webapp/vendor/commonui"]
+	path = webapp/vendor/commonui
+	url = https://github.com/DroneDB/CommonUI
