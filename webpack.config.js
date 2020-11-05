@@ -73,12 +73,13 @@ module.exports = {
     resolve: {
         alias: {
             'commonui': path.resolve(__dirname, 'webapp/vendor/commonui/'),
-            'vue$': 'vue/dist/vue.esm.js'
+            'vue$': 'vue/dist/vue.esm.js',
+            'ddb': path.resolve(__dirname, 'vendor/ddb/nodejs/js')
         },
         extensions: ['*', '.js', '.vue', '.json']
     },
 
     externals: {
-        "ddb": "DDB"
+       
     }
 }

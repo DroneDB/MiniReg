@@ -8,7 +8,7 @@ const Directories = require('./Directories');
 const mv = require('mv');
 const async = require('async');
 const tag = require('./tag');
-const ddb = require('ddb');
+const ddb = require('../vendor/ddb');
 
 const removeDirectory = function(dir, cb = () => {}){
     fs.stat(dir, (err, stats) => {

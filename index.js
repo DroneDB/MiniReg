@@ -3,7 +3,6 @@
 const fs = require('fs');
 const config = require('./config.js');
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
-const db = require('./libs/db');
 const users = require('./libs/users');
 const exphbs = require('express-handlebars');
 const hbhelpers = require('./webapp/views/helpers/helpers');
@@ -18,7 +17,9 @@ const app = express();
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const { jwtAuth } = require('./libs/jwt');
+const security = require('./libs/security');
 const share = require('./libs/share');
+const list = require('./libs/list');
 
 const hbs = exphbs.create({
     helpers: hbhelpers,
@@ -46,6 +47,8 @@ app.post('/users/authenticate', formDataParser, async (req, res) => {
         res.status(401).json({error: e.message});
     }
 });
+
+app.get('/orgs/:org/ds/:ds/list', security.allowDatasetOwnerOrPasswordOnly, list.handleList);
 
 // Not part of official API
 // These are views
