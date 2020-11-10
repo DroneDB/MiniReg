@@ -2,13 +2,15 @@
 <div id="browser">
     {{ org }} - {{ ds }}
 
-    <FileBrowser :loadRootNodes="loadRootNodes" @selectionChanged="handleFileSelectionChanged" @openProperties="handleFileBrowserOpenProperties" />
+    <FileBrowser :rootNodes="rootNodes" @selectionChanged="handleFileSelectionChanged" @openProperties="handleFileBrowserOpenProperties" />
 </div>
 </template>
 
 <script>
 import Message from 'commonui/components/Message.vue';
 import FileBrowser from 'commonui/components/FileBrowser.vue';
+import ddb from 'ddb';
+
 import {
     getAuthToken
 } from '../auth';
@@ -25,12 +27,22 @@ export default {
         }
     },
     methods: {
-        loadRootNodes: async function () {
+        rootNodes: async function () {
+            const dataset = new ddb.Dataset(`${this.org}/${this.ds}`);
+
             return [{
                 icon: "icon database",
-                label: "test",
-                path: "test"
+                label: this.ds,
+                path: dataset.remotePath(".")
             }];
+        },
+
+        handleFileSelectionChanged: function(){
+            // TODO
+        },
+
+        handleFileBrowserOpenProperties: function(){
+            // TODO
         }
     }
 }
