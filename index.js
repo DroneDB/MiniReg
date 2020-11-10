@@ -48,7 +48,7 @@ app.post('/users/authenticate', formDataParser, async (req, res) => {
     }
 });
 
-app.get('/orgs/:org/ds/:ds/list', security.allowDatasetOwnerOrPasswordOnly, list.handleList);
+app.get('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, list.handleList);
 
 // Not part of official API
 // These are views

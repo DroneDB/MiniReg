@@ -5,9 +5,10 @@ const path = require('path');
 module.exports = {
     handleList: async (req, res) => {
         const { org, ds } = req.params;
-
-        const ddbPath = path.join(Directories.ddbData, org, ds);
         
+        const ddbPath = path.join(Directories.ddbData, org, ds);
+        const paths = req.body.path ? [req.body.path.toString()] : ".";
+
         // Path traversal check
         if (ddbPath.indexOf(Directories.ddbData) !== 0){
             cb(new Error("Invalid path"));
@@ -15,7 +16,7 @@ module.exports = {
         }
 
         try{
-            res.json(await ddb.list(ddbPath, "."));
+            res.json(await ddb.list(ddbPath, paths));
         }catch(e){
             res.status(400).json({error: e.message});
         }

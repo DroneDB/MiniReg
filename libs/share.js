@@ -206,8 +206,6 @@ module.exports = {
     },
 
     handleInit: (req, res) => {
-        req.body = req.body || {};
-        
         const srcPath = path.join("tmp", req.id);
         const bodyFile = path.join(srcPath, "__body.json");
 
@@ -248,7 +246,7 @@ module.exports = {
                                  .catch(e => cb(e));
             },
             cb => {
-                res.json({token: req.id});
+                res.json({token: req.id, maxUploadChunkSize: 2147483647});
                 cb();
             }
         ],  err => {
