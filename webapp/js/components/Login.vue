@@ -69,7 +69,7 @@ export default {
                 body: formData
             }).then(r => r.json());
             if (res.token){
-                reg.setCredentials(this.username, res.token);
+                reg.setCredentials(this.username, res.token, res.expires);
 
                 // TODO: previous URL redirect to
                 window.location.href = `/r/${this.username}`;

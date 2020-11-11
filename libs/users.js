@@ -35,5 +35,13 @@ module.exports = {
         };
 
         return jwt.sign(signObj);
+    },
+
+    refreshToken: function(signObj){
+        const newObj = Object.assign({}, signObj);
+        delete newObj.iat;
+        delete newObj.exp;
+
+        return jwt.sign(newObj);
     }
 }

@@ -31,7 +31,7 @@ class LocalAuthProvider extends AbstractAuthProvider{
         r = db.prepare("SELECT username, metadata FROM users WHERE username = ? AND password = ?").get(username, crypto.createHmac('sha512', r.salt).update(password).digest("base64"));
         if (!r) throw new Error("Unauthorized");
 
-        return r;
+        return r.metadata ? JSON.parse(r.metadata) : {};
     }
 };
 

@@ -7,7 +7,10 @@ const crypto = require('crypto');
 dbconf.setIfNotExists("jwt_secret", crypto.randomBytes(32).toString('hex'));
 const secret = dbconf.get("jwt_secret");
 
+const DEFAULT_EXPIRATION_HOURS = 6;
+
 module.exports = {
+    DEFAULT_EXPIRATION_HOURS,
     readJwt: ejwt({ secret: secret, algorithms: ["HS256"]}),
 
     jwtAuth: [ejwt({ secret: secret, algorithms: ["HS256"]}), function(req, res, next){
@@ -16,6 +19,6 @@ module.exports = {
     	else next();
     }],
     sign: function(data){
-        return jwt.sign(data, secret, { expiresIn: '6h' });
+        return jwt.sign(data, secret, { expiresIn: DEFAULT_EXPIRATION_HOURS + 'h' });
     }
 }

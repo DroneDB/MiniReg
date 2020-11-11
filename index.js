@@ -16,7 +16,7 @@ const app = express();
 
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const { jwtAuth } = require('./libs/jwt');
+const { jwtAuth, DEFAULT_EXPIRATION_HOURS } = require('./libs/jwt');
 const security = require('./libs/security');
 const share = require('./libs/share');
 const list = require('./libs/list');
@@ -44,9 +44,18 @@ app.post('/users/authenticate', formDataParser, async (req, res) => {
     try{
         res.json({
             token: await users.login(req.body.username, req.body.password),
+            expires: parseInt(((new Date().getTime() + DEFAULT_EXPIRATION_HOURS * 60 * 60 * 1000) / 1000).toFixed(0)),    
+        });
+    }catch(e){
+        res.status(401).json({error: e.message});
+    }
+});
 
-            // 6 hours
-            expires: parseInt(((new Date().getTime() + 21600000) / 1000).toFixed(0)),    
+app.post('/users/authenticate/refresh', jwtAuth, (req, res) => {
+    try{
+        res.json({
+            token: users.refreshToken(req.user),
+            expires: parseInt(((new Date().getTime() + DEFAULT_EXPIRATION_HOURS * 60 * 60 * 1000) / 1000).toFixed(0)),    
         });
     }catch(e){
         res.status(401).json({error: e.message});
