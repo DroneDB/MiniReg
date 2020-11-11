@@ -51,7 +51,7 @@ export default {
       },
 
       logout: function(){
-          reg.clearCredentials();
+          reg.logout();
           location.href = '/login';
       }
   }

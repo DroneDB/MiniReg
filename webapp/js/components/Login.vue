@@ -59,25 +59,11 @@ export default {
         this.loggingIn = true;
         this.error = "";
         
-        const formData = new FormData();
-        formData.append("username", this.username);
-        formData.append("password", this.password);
-
         try{
-            const res = await fetch("/users/authenticate", {
-                method: 'POST',
-                body: formData
-            }).then(r => r.json());
-            if (res.token){
-                reg.setCredentials(this.username, res.token, res.expires);
-
-                // TODO: previous URL redirect to
-                window.location.href = `/r/${this.username}`;
-            }else{
-                this.error = res.error || `Cannot login: ${JSON.stringify(res)}`;
-            }
+            await reg.login(this.username, this.password);
+            location.href=`/r/${reg.getUsername()}`;
         }catch(e){
-            this.error = `Cannot login: ${e.message}`;
+            this.error = e.message;
         }
 
         this.loggingIn = false;

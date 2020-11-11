@@ -7,6 +7,7 @@ import Menu from './components/Menu';
 import Login from './components/Login.vue';
 import UserHome from './components/UserHome.vue';
 import Browser from './components/Browser.vue';
+import { Registry } from 'ddb';
 
 const APP_NAME = "DroneDB";
 
@@ -31,6 +32,12 @@ window.addEventListener('load', function(){
         router
     }).$mount("#app");
 
+    // Refresh auth tokens
+    const reg = new Registry(window.location.origin);
+    if (reg.isLoggedIn()){
+        reg.refreshToken();
+        reg.setAutoRefreshToken();
+    }
 
     // Live reload
     if (window.location.href.indexOf("localhost") !== -1 ||
