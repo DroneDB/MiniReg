@@ -1,8 +1,11 @@
 <template>
 <div id="browser">
-    {{ org }} - {{ ds }}
+    <Message bindTo="error" />
 
-    <FileBrowser :rootNodes="rootNodes" @selectionChanged="handleFileSelectionChanged" @openProperties="handleFileBrowserOpenProperties" />
+    <FileBrowser :rootNodes="rootNodes" 
+                    @selectionChanged="handleFileSelectionChanged" 
+                    @openProperties="handleFileBrowserOpenProperties"
+                    @unauthorized="handleUnauthorized" />
 </div>
 </template>
 
@@ -10,10 +13,6 @@
 import Message from 'commonui/components/Message.vue';
 import FileBrowser from 'commonui/components/FileBrowser.vue';
 import ddb from 'ddb';
-
-import {
-    getAuthToken
-} from '../auth';
 
 export default {
     props: ["org", "ds"],
@@ -26,6 +25,8 @@ export default {
             error: "",
         }
     },
+    mounted: function(){
+    },
     methods: {
         rootNodes: async function () {
             const dataset = new ddb.Dataset(`${this.org}/${this.ds}`);
@@ -33,7 +34,7 @@ export default {
             return [{
                 icon: "icon database",
                 label: this.ds,
-                path: dataset.remotePath(".")
+                path: dataset.remoteUri(".")
             }];
         },
 
@@ -43,6 +44,10 @@ export default {
 
         handleFileBrowserOpenProperties: function(){
             // TODO
+        },
+
+        handleUnauthorized: function(){
+
         }
     }
 }

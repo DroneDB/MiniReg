@@ -2,7 +2,11 @@ import 'commonui/main';
 import 'regenerator-runtime';
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+
 import Menu from './components/Menu';
+import Login from './components/Login.vue';
+import UserHome from './components/UserHome.vue';
+import Browser from './components/Browser.vue';
 
 const APP_NAME = "DroneDB";
 
@@ -10,8 +14,12 @@ window.addEventListener('load', function(){
     Vue.use(VueRouter);
     new Vue(Menu).$mount("#header");
     
-    const routes = window._getRoutes(window._params);
-    const router = new VueRouter({ routes });
+    const routes = [
+        { path: '/r/:org/:ds', component: Browser, meta: { title: "Browser"}},
+        { path: '/login', component: Login, meta: { title: "Login" } },
+        { path: '/r/:org', component: UserHome, meta: { title: "Home"}}
+    ];
+    const router = new VueRouter({ mode: "history", routes });
 
     // Set titles
     router.beforeEach((to, _, next) => {

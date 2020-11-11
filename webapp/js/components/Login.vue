@@ -31,7 +31,9 @@
 
 <script>
 import Message from 'commonui/components/Message.vue';
-import { setCredentials, isLoggedIn, getUsername } from '../auth';
+import { Registry } from 'ddb';
+
+const reg = new Registry(window.location.origin);
 
 export default {
   components: {
@@ -47,8 +49,8 @@ export default {
       }
   },
   beforeMount: function(){
-      if (isLoggedIn()){
-          location.href = `/r/${getUsername()}`;
+      if (reg.isLoggedIn()){
+          location.href = `/r/${reg.getUsername()}`;
       }
   },
   methods: {
@@ -67,7 +69,7 @@ export default {
                 body: formData
             }).then(r => r.json());
             if (res.token){
-                setCredentials(this.username, res.token);
+                reg.setCredentials(this.username, res.token);
 
                 // TODO: previous URL redirect to
                 window.location.href = `/r/${this.username}`;

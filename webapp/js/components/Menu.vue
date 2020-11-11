@@ -2,7 +2,7 @@
 <div id="header">
     <a href="/" class="logo"><img style="width: 140px;" src="/images/banner.svg" alt="DroneDB"></a>
     <div class="right">
-        <button v-if="!loggedIn" class="ui button primary"><i class="icon lock"></i> Sign In</button>
+        <button v-if="!loggedIn" class="ui button primary" @click="signIn"><i class="icon lock"></i> Sign In</button>
         <div v-else class="circular ui icon top right pointing dropdown button" 
             @click.stop="toggleMenu"
             :title="username">
@@ -17,14 +17,16 @@
 </template>
 
 <script>
-import { isLoggedIn, getUsername, clearCredentials } from '../auth';
+import { Registry } from 'ddb';
+const reg = new Registry(window.location.origin);
+
 export default {
   components: {
   },
   data: function(){
       return {
-          loggedIn: isLoggedIn(),
-          username: getUsername()
+          loggedIn: reg.isLoggedIn(),
+          username: reg.getUsername()
       }
   },
   mounted: function(){
@@ -34,6 +36,10 @@ export default {
       document.removeEventListener('click', this.hideMenu);
   },
   methods: {
+      signIn: function(){
+          location.href = '/login';
+      },
+
       toggleMenu: function(){
           this.$refs.menu.style.display = this.$refs.menu.style.display === 'block' ? 
                                           'none' : 
@@ -41,11 +47,11 @@ export default {
       },
 
       hideMenu: function(){
-          this.$refs.menu.style.display = 'none';
+          if (this.$refs.menu) this.$refs.menu.style.display = 'none';
       },
 
       logout: function(){
-          clearCredentials();
+          reg.clearCredentials();
           location.href = '/login';
       }
   }

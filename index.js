@@ -42,26 +42,26 @@ app.post('/share/commit/:uuid', jwtAuth, share.getUUID, share.handleCommit);
 
 app.post('/users/authenticate', formDataParser, async (req, res) => {
     try{
-        res.json({token: await users.login(req.body.username, req.body.password)});
+        res.json({
+            token: await users.login(req.body.username, req.body.password),
+
+            // 6 hours
+            expires: parseInt(((new Date().getTime() + 21600000) / 1000).toFixed(0)),    
+        });
     }catch(e){
         res.status(401).json({error: e.message});
     }
 });
 
-app.get('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, list.handleList);
+app.post('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, list.handleList);
 
 // Not part of official API
 // These are views
 app.get('/r/:org/:ds?', (req, res) => {
-    if (req.params.ds){
-        res.render('dataset', { params: req.params });
-    }else{
-        res.send("TODO");
-        // res.redirect(301, `/#/r/${req.params.org}`);
-    }
+    res.render('app');
 });
 app.get('/login', (req, res) => {
-    res.render('login');
+    res.render('app');
 });
 app.get('/', (req, res) => {
     res.redirect(301, '/login');

@@ -1,14 +1,13 @@
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
+const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
     mode: 'development',
     
     entry: {
-        main: path.join(__dirname, './webapp/js/main.js'),
-        dataset: path.join(__dirname, './webapp/js/dataset.js'),
-        login: path.join(__dirname, './webapp/js/login.js')
+        main: path.join(__dirname, './webapp/js/main.js')
     },
     
     output: {
@@ -67,7 +66,10 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin(),
-        new LiveReloadPlugin()
+        new LiveReloadPlugin(),
+        new webpack.NormalModuleReplacementPlugin(/(.*)polyfills\/node\/(.*)/, function(resource) {
+            resource.request = resource.request.replace(/polyfills\/node\//, `polyfills\/web\/`);
+        })
     ],
 
     resolve: {
@@ -80,6 +82,5 @@ module.exports = {
     },
 
     externals: {
-       
     }
 }
