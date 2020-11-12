@@ -14,6 +14,9 @@ import Message from 'commonui/components/Message.vue';
 import FileBrowser from 'commonui/components/FileBrowser.vue';
 import ddb from 'ddb';
 
+const { Registry } = ddb;
+const reg = new Registry(window.location.origin);
+
 export default {
     props: ["org", "ds"],
     components: {
@@ -29,11 +32,12 @@ export default {
     },
     methods: {
         rootNodes: async function () {
-            const dataset = new ddb.Dataset(`${this.org}/${this.ds}`);
+            const dataset = reg.Organization(this.$route.params.org)
+                               .Dataset(this.$route.params.ds);
 
             return [{
                 icon: "icon database",
-                label: this.ds,
+                label: this.$route.params.ds,
                 path: dataset.remoteUri(".")
             }];
         },

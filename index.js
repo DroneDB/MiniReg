@@ -20,6 +20,7 @@ const { jwtAuth, DEFAULT_EXPIRATION_HOURS } = require('./libs/jwt');
 const security = require('./libs/security');
 const share = require('./libs/share');
 const list = require('./libs/list');
+const orgs = require('./libs/orgs');
 
 const hbs = exphbs.create({
     helpers: hbhelpers,
@@ -61,6 +62,8 @@ app.post('/users/authenticate/refresh', jwtAuth, (req, res) => {
         res.status(401).json({error: e.message});
     }
 });
+
+app.get('/orgs/:org/ds', security.allowOrgOwnerOrPublicOrgOnly, orgs.handleListDatasets);
 
 app.post('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, list.handleList);
 

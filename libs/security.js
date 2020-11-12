@@ -2,6 +2,24 @@ const { readJwt } = require('./jwt');
 const { PUBLIC_ORG_NAME } = require('./tag');
 
 module.exports = {
+    allowOrgOwnerOrPublicOrgOnly: [readJwt, function(req, res, next){
+        const { org } = req.params;
+
+        if (!org) res.status(400).json({error: "Missing organization param"});
+        
+        if (req.user.username && req.user.username == org){
+            next(); // Grant
+            return;
+        }
+
+        if (org === PUBLIC_ORG_NAME){
+            next(); // Grant
+            return;
+        }
+
+        res.status(401).json({error: "Unauthorized"});
+    }],
+
     allowDatasetOwnerOrPasswordOnly: [readJwt, function(req, res, next){
         const { org, ds } = req.params;
 
