@@ -9,6 +9,7 @@ const mv = require('mv');
 const async = require('async');
 const tag = require('./tag');
 const ddb = require('../vendor/ddb');
+const { PUBLIC_ORG_NAME } = require('./tag');
 
 const removeDirectory = function(dir, cb = () => {}){
     fs.stat(dir, (err, stats) => {
@@ -218,7 +219,8 @@ module.exports = {
         const t = tag.parseOrCreateTag(req.body.tag);
 
         // Fill organization if missing
-        if (t.organization.trim() === ""){
+        if (t.organization.trim() === "" || t.organization === PUBLIC_ORG_NAME){
+            // TODO: support for anonymous users
             t.organization = req.user.username;
         }
         

@@ -19,7 +19,7 @@ const multer = require('multer');
 const { jwtAuth, DEFAULT_EXPIRATION_HOURS } = require('./libs/jwt');
 const security = require('./libs/security');
 const share = require('./libs/share');
-const list = require('./libs/list');
+const dataset = require('./libs/dataset');
 const orgs = require('./libs/orgs');
 
 const hbs = exphbs.create({
@@ -65,7 +65,8 @@ app.post('/users/authenticate/refresh', jwtAuth, (req, res) => {
 
 app.get('/orgs/:org/ds', security.allowOrgOwnerOrPublicOrgOnly, orgs.handleListDatasets);
 
-app.post('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, list.handleList);
+app.post('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleList);
+app.delete('/orgs/:org/ds/:ds', security.allowDatasetOwnerOnly, dataset.handleDelete);
 
 // Not part of official API
 // These are views

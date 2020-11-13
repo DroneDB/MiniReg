@@ -10,9 +10,11 @@
     <div v-else v-for="ds in datasets" class="ui segments datasets">
         <div class="ui segment">
             <div class="ui middle aligned divided list">
-                <div class="item" @click="openDataset(ds)">
+                <div class="item">
                     <div class="right floated">
-                        <div @click.stop="handleDelete(ds)" class="ui button icon small negative"><i class="ui icon trash"></i></div>
+                        <button @click.stop="handleDelete(ds)" class="ui button icon small negative" 
+                            :class="{loading: ds.deleting}"
+                            :disabled="ds.deleting"><i class="ui icon trash"></i></button>
                     </div>
                     
                     <a :href="$route.params.org + '/' + ds.slug"><i class="large database icon"></i> {{ds.slug}}</a>
@@ -43,22 +45,27 @@ export default {
     },
     mounted: async function(){
         try{
-            const org = reg.Organization(this.$route.params.org)
-            this.datasets = await org.datasets();
+            this.org = reg.Organization(this.$route.params.org)
+            this.datasets = await this.org.datasets();
         }catch(e){
             this.error = e.message;
         }
         this.loading = false;
     },
     methods: {
-        handleDelete(ds){
+        async handleDelete(ds){
             if (window.confirm(`Are you sure you want to delete ${ds.slug}?`)){
-                console.log("TODO");
+                this.$set(ds, 'deleting', true);
+                try{
+                    if (await this.org.Dataset(ds.slug).delete()){
+                        this.datasets = this.datasets.filter(d => d !== ds);
+                    }
+                }catch(e){
+                    console.log(e.message);
+                    this.error = e.message;
+                }
+                this.$set(ds, 'deleting', false);
             }
-        },
-
-        openDataset(ds){
-            window.location.href = this.$route.params.org + '/' + ds.slug;
         }
     }
 }
