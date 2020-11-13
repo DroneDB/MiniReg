@@ -48,7 +48,7 @@ export default {
   },
   beforeMount: function(){
       if (reg.isLoggedIn()){
-          location.href = `/r/${reg.getUsername()}`;
+          this.$router.push({name: "UserHome", params: {org: reg.getUsername()}});
       }
   },
   methods: {

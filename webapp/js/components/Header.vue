@@ -43,7 +43,6 @@ export default {
   },
   methods: {
       onRegLogin: function(username){
-          console.log(username);
           this.username = username;
           this.loggedIn = true;
       },

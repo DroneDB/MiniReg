@@ -1,7 +1,7 @@
 <template>
 <div id="app">
     <Header @login="handleLogin" @logout="handleLogout" />
-    <div ref="views">
+    <div id="views" ref="views">
     </div>
 </div>
 </template>
@@ -70,5 +70,13 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+#app{
+    &.fullpage{
+        height: 100%;
+        & > div#views{
+            height: 100%;
+        }
+    }
+}
 </style>

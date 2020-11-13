@@ -53,10 +53,10 @@ export default {
         }
     },
     mounted: function(){
-        document.getElementById("app").style.height = '100%';
+        document.getElementById("app").classList.add("fullpage");
     },
     destroyed: function(){
-        document.getElementById("app").style.height = 'auto';
+        document.getElementById("app").classList.remove("fullpage");
     },
     computed: {
         selectedFiles: function () {
