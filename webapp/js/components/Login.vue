@@ -31,9 +31,7 @@
 
 <script>
 import Message from 'commonui/components/Message.vue';
-import { Registry } from 'ddb';
-
-const reg = new Registry(window.location.origin);
+import reg from '../libs/sharedRegistry';
 
 export default {
   components: {
@@ -61,7 +59,7 @@ export default {
         
         try{
             await reg.login(this.username, this.password);
-            location.href=`/r/${reg.getUsername()}`;
+            this.$router.push({name: "UserHome", params: {org: reg.getUsername()}});
         }catch(e){
             this.error = e.message;
         }

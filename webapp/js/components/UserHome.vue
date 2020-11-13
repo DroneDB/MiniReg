@@ -17,7 +17,7 @@
                             :disabled="ds.deleting"><i class="ui icon trash"></i></button>
                     </div>
                     
-                    <a :href="$route.params.org + '/' + ds.slug"><i class="large database icon"></i> {{ds.slug}}</a>
+                    <a href="javascript:void(0)" @click.stop="viewDataset(ds)"><i class="large database icon"></i> {{ds.slug}}</a>
                 </div>
             </div>
         </div>
@@ -45,7 +45,7 @@ export default {
     },
     mounted: async function(){
         try{
-            this.org = reg.Organization(this.$route.params.org)
+            this.org = reg.Organization(this.$route.params.org);
             this.datasets = await this.org.datasets();
         }catch(e){
             this.error = e.message;
@@ -66,6 +66,13 @@ export default {
                 }
                 this.$set(ds, 'deleting', false);
             }
+        },
+
+        viewDataset(ds){
+            this.$router.push({name: "ViewDataset", params: {
+                org: this.$route.params.org,
+                ds: ds.slug 
+            }});
         }
     }
 }

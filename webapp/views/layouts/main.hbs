@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="/images/icon.png" sizes="150x150">
 
     <style>
-    .main-loading{
+    #main-loading{
         position: absolute;
         top: 50%;
         left: 50%;
@@ -31,14 +31,8 @@
 </head>
 
 <body>
-    <div id="header">
-    </div>
-
-    <div id="app">
-        <router-view>
-            <div class="main-loading"></div>
-        </router-view>
-    </div>
+    <div id="main-loading"></div>
+    <div id="app"></div>
 
     {{{ setParams params }}}
     <script src="/build/main.js"></script>

@@ -2,7 +2,7 @@
 <div id="header">
     <a href="/" class="logo"><img style="width: 140px;" src="/images/banner.svg" alt="DroneDB"></a>
     <div class="right">
-        <button v-if="!loggedIn" class="ui button primary" @click="signIn"><i class="icon lock"></i> Sign In</button>
+        <button v-if="!loggedIn" class="ui button primary" @click="login"><i class="icon lock"></i> Sign In</button>
         <div v-else class="circular ui icon top right pointing dropdown button" 
             @click.stop="toggleMenu"
             :title="username">
@@ -17,31 +17,48 @@
 </template>
 
 <script>
-import { Registry } from 'ddb';
-const reg = new Registry(window.location.origin);
+import reg from '../libs/sharedRegistry';
 
 export default {
   components: {
   },
   data: function(){
       return {
-          loggedIn: reg.isLoggedIn(),
-          username: reg.getUsername()
+          username: reg.getUsername(),
+          loggedIn: reg.isLoggedIn()
       }
   },
   mounted: function(){
       document.addEventListener('click', this.hideMenu);
+
+      reg.addEventListener('login', this.onRegLogin);
+      reg.addEventListener('logout', this.onRegLogout);
+      
   },
   destroyed: function(){
+      reg.removeEventListener('login', this.onRegLogin);
+      reg.removeEventListener('logout', this.onRegLogout);
+
       document.removeEventListener('click', this.hideMenu);
   },
   methods: {
-      signIn: function(){
-          location.href = '/login';
+      onRegLogin: function(username){
+          console.log(username);
+          this.username = username;
+          this.loggedIn = true;
+      },
+      
+      onRegLogout: function(){
+          this.username = "";
+          this.loggedIn = false;
+      },
+
+      login: function(){
+          this.$emit("login");
       },
 
       toggleMenu: function(){
-          this.$refs.menu.style.display = this.$refs.menu.style.display === 'block' ? 
+          if (this.$refs.menu) this.$refs.menu.style.display = this.$refs.menu.style.display === 'block' ? 
                                           'none' : 
                                           'block';
       },
@@ -51,8 +68,7 @@ export default {
       },
 
       logout: function(){
-          reg.logout();
-          location.href = '/login';
+          this.$emit("logout");
       }
   }
 }
