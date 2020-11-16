@@ -45,7 +45,7 @@ module.exports = {
             // TODO: entry.size is zero (DDB is a folder), but we should probably
             // include the size of the database (sum all indexes entries)
             
-            res.json(entry);
+            res.json(entries);
         }catch(e){
             res.status(400).json({error: e.message});
         }

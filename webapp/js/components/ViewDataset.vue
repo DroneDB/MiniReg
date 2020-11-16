@@ -28,6 +28,8 @@ import FileBrowser from 'commonui/components/FileBrowser.vue';
 import Map from 'commonui/components/Map.vue';
 import Explorer from 'commonui/components/Explorer.vue';
 import Properties from 'commonui/components/Properties.vue';
+import pathutils from 'commonui/classes/pathutils';
+import icons from 'commonui/classes/icons';
 
 import ddb from 'ddb';
 
@@ -70,14 +72,15 @@ export default {
         rootNodes: async function () {
             const dataset = reg.Organization(this.$route.params.org)
                                .Dataset(this.$route.params.ds);
-            const entry = await dataset.info();
+            const entries = await dataset.info();
 
-            return [{
-                icon: "icon database",
-                label: this.$route.params.ds,
-                path: entry.path,
-                entry
-            }];
+            return entries.map(e => { return {
+                    icon: icons.getForType(e.type),
+                    label: pathutils.basename(e.path),
+                    path: e.path,
+                    entry: e
+                };
+            });
         },
 
         handleFileSelectionChanged: function (fileBrowserFiles) {
