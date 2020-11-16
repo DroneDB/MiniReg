@@ -70,8 +70,10 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #app{
+    display: flex;
+    flex-direction: column;
     &.fullpage{
         height: 100%;
         & > div#views{

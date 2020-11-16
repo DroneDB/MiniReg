@@ -29,6 +29,28 @@ module.exports = {
 
     }],
 
+    handleInfo: [getDDBPath, async (req, res) => {
+        try{
+            const entries = await ddb.info(req.ddbPath);
+            if (!entries.length) throw new Error("Cannot find dataset");
+            
+            const entry = entries[0];
+
+            // Override depth and path
+            entry.depth = 0;
+
+            // TODO: SSL check
+            entry.path = `ddb+unsafe://${req.headers.host}/${req.params.org}/${req.params.ds}`;
+
+            // TODO: entry.size is zero (DDB is a folder), but we should probably
+            // include the size of the database (sum all indexes entries)
+            
+            res.json(entry);
+        }catch(e){
+            res.status(400).json({error: e.message});
+        }
+    }],
+
     handleDelete: [getDDBPath, async (req, res) => {
         fs.rmdir(req.ddbPath, { recursive: true, maxRetries: 5}, err => {
             if (!err) res.status(204).send("");

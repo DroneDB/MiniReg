@@ -1,16 +1,15 @@
 <template>
 <div id="browser" class="cui app">
-        <Message bindTo="error" />
+    <Message bindTo="error" />
 
-        <div class="container main">
-            <div class="sidebar">
-                <div class="tabs">
-                    <div class="tab">
-                            <FileBrowser :rootNodes="rootNodes" 
-                                @selectionChanged="handleFileSelectionChanged" 
-                                @openProperties="handleFileBrowserOpenProperties"
-                                @unauthorized="handleUnauthorized" />
-                    </div>
+    <div class="container main">
+        <div class="sidebar">
+            <div class="tabs">
+                <div class="tab">
+                        <FileBrowser :rootNodes="rootNodes" 
+                            @selectionChanged="handleFileSelectionChanged" 
+                            @openProperties="handleFileBrowserOpenProperties"
+                            @unauthorized="handleUnauthorized" />
                 </div>
             </div>
         </div>
@@ -18,8 +17,8 @@
             <Explorer :files="fileBrowserFiles" @folderOpened="handleFileSelectionChanged" @openProperties="handleExplorerOpenProperties" />
             <Map :files="fileBrowserFiles" />
         </div>
-
         <Properties v-if="showProperties" :files="selectedFiles" @onClose="handleCloseProperties" />
+    </div>
 </div>
 </template>
 
@@ -71,11 +70,13 @@ export default {
         rootNodes: async function () {
             const dataset = reg.Organization(this.$route.params.org)
                                .Dataset(this.$route.params.ds);
+            const entry = await dataset.info();
 
             return [{
                 icon: "icon database",
                 label: this.$route.params.ds,
-                path: dataset.remoteUri(".")
+                path: entry.path,
+                entry
             }];
         },
 
