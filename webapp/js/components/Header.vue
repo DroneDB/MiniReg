@@ -1,6 +1,6 @@
 <template>
 <div id="header">
-    <a href="/" class="logo"><img style="width: 140px;" src="/images/banner.svg" alt="DroneDB"></a>
+    <a :href="homeUrl" class="logo"><img style="width: 140px;" src="/images/banner.svg" alt="DroneDB"></a>
     <div class="right">
         <button v-if="!loggedIn" class="ui button primary" @click="login"><i class="icon lock"></i> Sign In</button>
         <div v-else class="circular ui icon top right pointing dropdown button" 
@@ -28,12 +28,18 @@ export default {
           loggedIn: reg.isLoggedIn()
       }
   },
+  computed: {
+      homeUrl: function(){
+          if (this.loggedIn){
+              return `/r/${this.username}`;
+          }else return "/";
+      }
+  },
   mounted: function(){
       document.addEventListener('click', this.hideMenu);
 
       reg.addEventListener('login', this.onRegLogin);
       reg.addEventListener('logout', this.onRegLogout);
-      
   },
   destroyed: function(){
       reg.removeEventListener('login', this.onRegLogin);
@@ -52,8 +58,13 @@ export default {
           this.loggedIn = false;
       },
 
+      logout: function(){
+          reg.logout();
+          this.login();
+      },
+
       login: function(){
-          this.$emit("login");
+          this.$router.push({name: "Login"}).catch(()=>{});
       },
 
       toggleMenu: function(){
@@ -64,10 +75,6 @@ export default {
 
       hideMenu: function(){
           if (this.$refs.menu) this.$refs.menu.style.display = 'none';
-      },
-
-      logout: function(){
-          this.$emit("logout");
       }
   }
 }

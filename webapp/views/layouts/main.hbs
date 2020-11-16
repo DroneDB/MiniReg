@@ -32,7 +32,10 @@
 
 <body>
     <div id="main-loading"></div>
-    <div id="app"></div>
+    <div id="app">
+        <router-view name="header"></router-view>
+        <router-view name="content"></router-view>
+    </div>
 
     {{{ setParams params }}}
     <script src="/build/main.js"></script>

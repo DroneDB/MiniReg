@@ -1,11 +1,44 @@
 import 'commonui/main';
 import 'regenerator-runtime';
 import Vue from 'vue';
+import VueRouter from 'vue-router';
 
-import App from './App.vue';
+import '../css/app.scss';
+import Header from './components/Header.vue';
+import Login from './components/Login.vue';
+import UserHome from './components/UserHome.vue';
+import ViewDataset from './components/ViewDataset.vue';
+import reg from './libs/sharedRegistry';
+
+const APP_NAME = "DroneDB";
 
 window.addEventListener('load', function(){
-    new Vue(App).$mount("#app");
+    Vue.use(VueRouter);
+        
+    const routes = [
+        { path: '/r/:org/:ds', name: "ViewDataset", components: {content: ViewDataset, header: Header}, meta: { title: "View Dataset"}},
+        { path: '/login', name: "Login", components: {content: Login, header: Header}, meta: { title: "Login" } },
+        { path: '/r/:org', name: "UserHome", components: {content: UserHome, header: Header}, meta: { title: "Home"}}
+    ];
+    const router = new VueRouter({ mode: "history", routes });
+
+    // Set titles
+    router.beforeEach((to, _, next) => {
+        document.title = to.meta.title + ` - ${APP_NAME}`;
+        next();
+    });
+
+    new Vue({
+        router
+    }).$mount("#app");
+
+    // Refresh auth tokens
+    if (reg.isLoggedIn()){
+        reg.refreshToken();
+        reg.setAutoRefreshToken();
+    }
+
+    document.getElementById("main-loading").style.display = 'none';
 
     // Live reload
     if (window.location.href.indexOf("localhost") !== -1 ||
