@@ -2,8 +2,9 @@
 <div id="header">
     <a :href="homeUrl" class="logo"><img style="width: 140px;" src="/images/banner.svg" alt="DroneDB"></a>
     <div class="right">
+        <button v-if="showDownload" class="ui button primary" @click="downloadDataset"><i class="icon download"></i> Download</button>
         <button v-if="!loggedIn" class="ui button primary" @click="login"><i class="icon lock"></i> Sign In</button>
-        <div v-else class="circular ui icon top right pointing dropdown button" 
+        <div v-else class="circular ui icon top right pointing dropdown button user-menu" 
             @click.stop="toggleMenu"
             :title="username">
             <i class="icon user"></i>
@@ -25,7 +26,9 @@ export default {
   data: function(){
       return {
           username: reg.getUsername(),
-          loggedIn: reg.isLoggedIn()
+          loggedIn: reg.isLoggedIn(),
+          params: this.$route.params,
+          showDownload: !!this.$route.params.ds
       }
   },
   computed: {
@@ -41,7 +44,18 @@ export default {
       reg.addEventListener('login', this.onRegLogin);
       reg.addEventListener('logout', this.onRegLogout);
   },
-  destroyed: function(){
+  watch: {
+      $route: function(to, from){
+          const { params } = to;
+          
+          // TODO: we might need have more complex 
+          // logic in the future to see who has access
+          // to download files?
+          this.showDownload = !!params.ds; 
+          this.params = params;
+      }
+  },
+  unmounted: function(){
       reg.removeEventListener('login', this.onRegLogin);
       reg.removeEventListener('logout', this.onRegLogout);
 
@@ -75,6 +89,10 @@ export default {
 
       hideMenu: function(){
           if (this.$refs.menu) this.$refs.menu.style.display = 'none';
+      },
+
+      downloadDataset: function(){
+          
       }
   }
 }
@@ -88,11 +106,14 @@ export default {
     width: 100%;
     box-shadow: 0px 2px 4px -2px #000000;
     display: flex;
-}
-#header .logo{
-    margin-top: 4px;
-}
-#header .right{
-    margin-left: auto;
+    .logo{
+        margin-top: 4px;
+    }
+    .right{
+        margin-left: auto;
+    }
+    .user-menu{
+        margin-left: 8px;
+    }
 }
 </style>

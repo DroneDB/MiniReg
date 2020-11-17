@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/DroneDB/MiniReg#readme",
   "dependencies": {
+    "archiver": "^5.0.2",
     "async": "^3.2.0",
     "axios": "^0.20.0",
     "better-sqlite3": "^7.1.1",

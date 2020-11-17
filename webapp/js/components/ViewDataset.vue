@@ -30,11 +30,7 @@ import Explorer from 'commonui/components/Explorer.vue';
 import Properties from 'commonui/components/Properties.vue';
 import pathutils from 'commonui/classes/pathutils';
 import icons from 'commonui/classes/icons';
-
-import ddb from 'ddb';
-
-const { Registry } = ddb;
-const reg = new Registry(window.location.origin);
+import reg from '../libs/sharedRegistry';
 
 export default {
     props: ["org", "ds"],
@@ -56,7 +52,7 @@ export default {
     mounted: function(){
         document.getElementById("app").classList.add("fullpage");
     },
-    destroyed: function(){
+    unmounted: function(){
         document.getElementById("app").classList.remove("fullpage");
     },
     computed: {

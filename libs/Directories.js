@@ -10,6 +10,10 @@ class Directories{
     static get ddbData(){
         return path.join(this.data, "ddb");
     }
+
+    static get downloads(){
+        return path.join(this.data, "downloads");
+    }
 }
 
 module.exports = Directories;

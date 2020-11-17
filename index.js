@@ -66,6 +66,8 @@ app.post('/users/authenticate/refresh', jwtAuth, (req, res) => {
 app.get('/orgs/:org/ds', security.allowOrgOwnerOrPublicOrgOnly, orgs.handleListDatasets);
 
 app.post('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleList);
+app.post('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleDownload);
+app.post('/orgs/:org/ds/:ds/download/check', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleDownloadCheck);
 
 app.get('/orgs/:org/ds/:ds', security.allowDatasetOwnerOrPasswordOnly, dataset.handleInfo);
 app.delete('/orgs/:org/ds/:ds', security.allowDatasetOwnerOnly, dataset.handleDelete);
@@ -81,6 +83,9 @@ app.get('/login', (req, res) => {
 app.get('/', (req, res) => {
     res.redirect(301, '/login');
 });
+
+// This is a download entrypoint (not part of spec)
+app.get('/download/:uuid', dataset.handleDownloadFile);
 
 app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
@@ -120,6 +125,7 @@ logger.info(`${packageJson.name} ${packageJson.version} - ${packageJson.descript
 let commands = [
     cb => {
         authProviders.initialize(config.auth, config.remoteAuth);
+        dataset.initialize();
 
         users.createDefaultUsers();
         server = app.listen(config.port, err => {
