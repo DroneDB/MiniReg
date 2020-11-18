@@ -28,7 +28,7 @@ export default {
           username: reg.getUsername(),
           loggedIn: reg.isLoggedIn(),
           params: this.$route.params,
-          showDownload: !!this.$route.params.ds
+          showDownload: !!this.$route.params.ds && reg.isLoggedIn()
       }
   },
   computed: {
@@ -51,7 +51,7 @@ export default {
           // TODO: we might need have more complex 
           // logic in the future to see who has access
           // to download files?
-          this.showDownload = !!params.ds; 
+          this.showDownload = !!params.ds && reg.isLoggedIn(); 
           this.params = params;
       }
   },
@@ -92,7 +92,9 @@ export default {
       },
 
       downloadDataset: function(){
-          
+          const { org, ds } = this.params;
+
+          location.href = reg.Organization(org).Dataset(ds).downloadUrl();
       }
   }
 }

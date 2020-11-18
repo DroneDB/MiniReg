@@ -9,6 +9,8 @@ const secret = dbconf.get("jwt_secret");
 const DEFAULT_EXPIRATION_HOURS = 6;
 
 const readJwt = function(req, res, next){
+    req.user = {};
+    
     let token = req.headers['Authorization'];
     if (token) token = token.replace(/^Bearer /i, "");
 

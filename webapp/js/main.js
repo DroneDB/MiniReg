@@ -28,15 +28,18 @@ window.addEventListener('load', function(){
         next();
     });
 
-    new Vue({
-        router
-    }).$mount("#app");
-
     // Refresh auth tokens
     if (reg.isLoggedIn()){
         reg.refreshToken();
         reg.setAutoRefreshToken();
+    }else{
+        reg.clearCredentials();
     }
+
+    new Vue({
+        router
+    }).$mount("#app");
+
 
     document.getElementById("main-loading").style.display = 'none';
 
