@@ -2,7 +2,12 @@
 <div id="header">
     <a :href="homeUrl" class="logo"><img style="width: 140px;" src="/images/banner.svg" alt="DroneDB"></a>
     <div class="right">
-        <button v-if="showDownload" class="ui button primary" @click="downloadDataset"><i class="icon download"></i> Download</button>
+        <a :href="downloadUrl" 
+            v-if="showDownload"
+            title="Download"
+            class="ui button primary download">
+                <i class="icon download"></i> {{ downloadLabel }}
+        </a>
         <button v-if="!loggedIn" class="ui button primary" @click="login"><i class="icon lock"></i> Sign In</button>
         <div v-else class="circular ui icon top right pointing dropdown button user-menu" 
             @click.stop="toggleMenu"
@@ -18,6 +23,7 @@
 </template>
 
 <script>
+import { utils } from 'ddb';
 import reg from '../libs/sharedRegistry';
 
 export default {
@@ -28,7 +34,8 @@ export default {
           username: reg.getUsername(),
           loggedIn: reg.isLoggedIn(),
           params: this.$route.params,
-          showDownload: !!this.$route.params.ds && reg.isLoggedIn()
+          showDownload: !!this.$route.params.ds && reg.isLoggedIn(),
+          selectedFiles: []
       }
   },
   computed: {
@@ -36,6 +43,31 @@ export default {
           if (this.loggedIn){
               return `/r/${this.username}`;
           }else return "/";
+      },
+
+      downloadUrl: function(){
+        const { org, ds } = this.params;
+        if (org && ds){
+            const dataset = reg.Organization(org).Dataset(ds);
+
+            if (this.selectedFiles.length > 0){
+                return dataset.downloadUrl(this.selectedFiles.map(f => {
+                    const { path } = utils.parseUri(f.path);
+                    console.log(path);
+                    return path;
+                }));
+            }else{
+                return dataset.downloadUrl();
+            }
+        }
+      },
+
+      downloadLabel: function(){
+          if (this.selectedFiles.length > 0){
+              return `${this.selectedFiles.length}`;
+          }else{
+              return "Download";
+          }
       }
   },
   mounted: function(){
@@ -89,12 +121,6 @@ export default {
 
       hideMenu: function(){
           if (this.$refs.menu) this.$refs.menu.style.display = 'none';
-      },
-
-      downloadDataset: function(){
-          const { org, ds } = this.params;
-
-          location.href = reg.Organization(org).Dataset(ds).downloadUrl();
       }
   }
 }
@@ -116,6 +142,9 @@ export default {
     }
     .user-menu{
         margin-left: 8px;
+    }
+    .button.download{
+        min-width: 140px;
     }
 }
 </style>

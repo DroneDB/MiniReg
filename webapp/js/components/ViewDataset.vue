@@ -20,9 +20,11 @@
         <Properties v-if="showProperties" :files="selectedFiles" @onClose="handleCloseProperties" />
     </div>
 </div>
+</div>
 </template>
 
 <script>
+import Header from './Header.vue';
 import Message from 'commonui/components/Message.vue';
 import FileBrowser from 'commonui/components/FileBrowser.vue';
 import Map from 'commonui/components/Map.vue';
@@ -35,6 +37,7 @@ import reg from '../libs/sharedRegistry';
 export default {
     props: ["org", "ds"],
     components: {
+        Header,
         Message,
         FileBrowser,
         Map,
@@ -74,6 +77,7 @@ export default {
                     icon: icons.getForType(e.type),
                     label: pathutils.basename(e.path),
                     path: e.path,
+                    expanded: true,
                     entry: e
                 };
             });
@@ -97,6 +101,15 @@ export default {
 
         handleUnauthorized: function(){
 
+        }
+    },
+    watch: {
+        fileBrowserFiles: {
+            deep: true,
+            handler: function (newVal, oldVal) {
+                const $header = this.$parent.$children[0];
+                $header.selectedFiles = this.selectedFiles;
+            }
         }
     }
 }
