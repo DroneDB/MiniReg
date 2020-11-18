@@ -8,10 +8,7 @@ const util = require('util');
 const archiver = require('archiver');
 
 const fsExists = util.promisify(fs.exists);
-const fsUnlink = util.promisify(fs.unlink);
 const fsLstat = util.promisify(fs.lstat);
-const fsMkdir = util.promisify(fs.mkdir);
-const fsReadir = util.promisify(fs.readdir);
 
 async function getDDBPath(req, res, next){
     const { org, ds } = req.params;
@@ -50,34 +47,50 @@ setInterval(async () => {
 
     for (let i = 0; i < tasksToCleanup.length; i++){
         const uuid = tasksToCleanup[i];
-        const dt = downloadTasks[uuid];
-
-        // Remove ONLY files in the downloads directory
-        if (dt.file.indexOf(Directories.downloads) === 0 && await fsExists(dt.file)){
-            await fsUnlink(dt.file);
-            logger.info(`Cleaned up ${dt.file}`);
-        }
-
         delete downloadTasks.uuid;
     }
 }, 2000);
 
-module.exports = {
-    initialize: async () => {
-        // Cleanup downloads on startup
-        const files = await fsReadir(Directories.downloads);
-        for (let i = 0; i < files.length; i++){
-            const f = path.join(Directories.downloads, files[i]);
-            try{
-                await fsUnlink(f);
-                logger.info(`Removed orphaned ${f}`);
-            }catch(e){
-                logger.error(e);
+async function handleDownloadTask(res, dt){
+    let archive = archiver.create('zip', {
+        zlib: { level: 1 } // Sets the compression level (1 = best speed since most assets are already compressed)
+    });
+
+    archive.on('error', err => {
+        logger.error(err);
+        if (!res.headersSent) res.status(400).json({error});
+    });
+
+    if (!dt.useZip && dt.paths.length === 1){
+        res.download(path.resolve(path.join(dt.ddbPath, dt.paths[0])), dt.friendlyName);
+    }else{
+        res.attachment(dt.friendlyName);
+
+        archive.pipe(res);
+
+        if (dt.addAll){
+            // Add everything
+            // TODO: do not return .ddb?
+            archive.directory(dt.ddbPath, false);
+        }else{
+            for (let i = 0; i < dt.paths.length; i++){
+                const p = dt.paths[i];
+                const fullP = path.join(dt.ddbPath, p);
+
+                if ((await fsLstat(fullP)).isDirectory()){
+                    archive.directory(fullP, p);
+                }else{
+                    archive.file(fullP, {name: p});
+                }
             }
         }
-    },
 
-    handleDownloadFile: (req, res) => {
+        archive.finalize();
+    }
+}
+
+module.exports = {
+    handleDownloadFile: async (req, res) => {
         const { uuid } = req.params;
 
         const dt = downloadTasks[uuid];
@@ -86,13 +99,7 @@ module.exports = {
             return;
         }
 
-        if (dt.completed){
-            res.download(path.resolve(dt.file), dt.friendlyName);
-        }else if (dt.error){
-            res.status(400).json({error: dt.error});
-        }else{
-            res.json({error: "Not ready for download"});
-        }
+        await handleDownloadTask(res, dt);
     },
 
     handleList: [getDDBPath, async (req, res) => {
@@ -128,67 +135,64 @@ module.exports = {
         }
     }],
 
-    handleDownloadCheck: [getDDBPath, async (req, res) => {
-        const { uuid } = req.body;
-        const dt = downloadTasks[uuid];
-
-        if (!dt){
-            res.status(400).json({error: "Invalid UUID"});
-            return;
-        }
-
-        if (dt.completed){
-            res.status(200).json({downloadUrl: `/download/${uuid}`});
-        }else if (dt.error){
-            res.json({error: dt.error});
-        }else{
-            res.json({progress: dt.progress});
-        }
-    }],
-
     handleDownload: [getDDBPath, async (req, res) => {
         const { org, ds } = req.params;
 
-        // Generate UUID based on dataset+paths
-        const hash = crypto.createHash('sha256');
-        let paths = req.body.path || [];
+        let paths = [];
+        if (req.method === "GET" && typeof req.query.path === "string"){
+            paths = req.query.path.split(',');
+        }else if (req.method === "POST" && req.body.path){
+            paths = req.body.path;
+        }
+        
         if (typeof paths === "string") paths = [paths];
-
+        
         // Generate UUID
+        const hash = crypto.createHash('sha256');
         const uuid = hash.update(`${Math.random()}/${new Date().getTime()}`).digest("hex");
         const useZip = (paths.length === 0) || (paths.length > 1);
 
         const die = async (error) => {
-            console.log(error);
+            logger.error(error);
             const dt = downloadTasks[uuid];
             if (dt) dt.error = error;
-            if (!res.headersSent) res.json({error});
+            if (!res.headersSent) res.status(400).json({error});
         };
 
         if (!useZip){
             // Download directly, easy
-            const file = path.join(req.ddbPath, paths[0]);
+            const file = paths[0];
+            const fullPath = path.join(req.ddbPath, file);
+
+            if (!await fsExists(fullPath)){
+                await die("Invalid path");
+                return;
+            }
 
             // Path traversal check
-            if (file.indexOf(req.ddbPath) !== 0){
+            if (fullPath.indexOf(req.ddbPath) !== 0){
                 await die("Invalid path");
                 return;
             }
 
             downloadTasks[uuid] = {
-                file,
+                paths: [file],
+                ddbPath: req.ddbPath,
+                useZip: false,
                 friendlyName: path.basename(file),
-                progress: 100,
-                completed: true,
-                error: "",
                 created: new Date().getTime()
             };
 
-            res.status(200).json({downloadUrl: `/download/${uuid}`});
+            if (req.method === "POST"){
+                res.status(200).json({downloadUrl: `/download/${uuid}`});
+            }else{
+                await handleDownloadTask(res, downloadTasks[uuid]);
+            }
         }else{
-            const zipFile = path.join(Directories.downloads, `${uuid}.zip`);
-
             try{
+                // Remove duplicates
+                paths = [...new Set(paths)];
+
                 // Basic path checks
                 for (let i = 0; i < paths.length; i++){
                     const p = paths[i];
@@ -205,64 +209,21 @@ module.exports = {
                         return;
                     }
                 }
-
-                
+              
                 downloadTasks[uuid] = {
-                    file: zipFile,
+                    paths,
+                    addAll: paths.length === 0,
+                    ddbPath: req.ddbPath,
+                    useZip: true,
                     friendlyName: `${org}-${ds}.zip`,
-                    progress: 0,
-                    completed: false,
-                    error: "",
                     created: new Date().getTime()
                 };
-                const dt = downloadTasks[uuid];
-
-                let archive = archiver.create('zip', {
-                    zlib: { level: 1 } // Sets the compression level (1 = best speed since most assets are already compressed)
-                });
-
-                archive.on('error', err => {
-                    die(err.message);
-                });
-
-                archive.on('progress', p => {
-                    dt.progress = p.fs.processedBytes / p.fs.totalBytes * 90.0;
-                });
-
-                // This shouldn't happen, but just in case
-                if (await fsExists(zipFile)) await fsUnlink(zipFile);
                 
-                // Guarantee downloads dir exists
-                if (!await fsExists(Directories.downloads)) await fsMkdir(Directories.downloads);
-
-                const fout = fs.createWriteStream(zipFile);
-                fout.on('close', () => {
-                    dt.progress = 100;
-                    dt.completed = true;
-                });
-
-                archive.pipe(fout);
-
-                // return this to the client, then start processing
-                res.status(200).json({id: uuid, progress: dt.progress});
-                
-                if (paths.length === 0){
-                    // Add everything
-                    archive.directory(req.ddbPath, false);
+                if (req.method === "POST"){
+                    res.status(200).json({downloadUrl: `/download/${uuid}`});
                 }else{
-                    for (let i = 0; i < paths.length; i++){
-                        const p = paths[i];
-                        const fullP = path.join(req.ddbPath, p);
-                       
-                        if ((await fsLstat(fullP)).isDirectory()){
-                            archive.directory(fullP, p);
-                        }else{
-                            archive.file(fullP, {name: p});
-                        }
-                    }
+                    await handleDownloadTask(res, downloadTasks[uuid]);
                 }
-
-                archive.finalize();
             }catch(e){
                 await die(`Cannot download dataset: ${e.message}`);
             }

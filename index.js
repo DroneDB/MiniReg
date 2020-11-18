@@ -5,6 +5,7 @@ const config = require('./config.js');
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 const users = require('./libs/users');
 const exphbs = require('express-handlebars');
+const cookieParser = require('cookie-parser');
 const hbhelpers = require('./webapp/views/helpers/helpers');
 
 const logger = require('./libs/logger');
@@ -32,6 +33,7 @@ app.set('views', 'webapp/views');
 if (process.env.NODE_ENV === 'production') app.enable('view cache');
 
 app.use(express.static('webapp/public'));
+app.use(cookieParser());
 
 const formDataParser = [multer().none(), bodyParser.urlencoded({extended: false})];
 
@@ -43,8 +45,10 @@ app.post('/share/commit/:uuid', jwtAuth, share.getUUID, share.handleCommit);
 
 app.post('/users/authenticate', formDataParser, async (req, res) => {
     try{
+        const token = await users.login(req.body.username, req.body.password);
+
         res.json({
-            token: await users.login(req.body.username, req.body.password),
+            token,
             expires: parseInt(((new Date().getTime() + DEFAULT_EXPIRATION_HOURS * 60 * 60 * 1000) / 1000).toFixed(0)),    
         });
     }catch(e){
@@ -54,8 +58,10 @@ app.post('/users/authenticate', formDataParser, async (req, res) => {
 
 app.post('/users/authenticate/refresh', jwtAuth, (req, res) => {
     try{
+        const token = users.refreshToken(req.user);
+
         res.json({
-            token: users.refreshToken(req.user),
+            token,
             expires: parseInt(((new Date().getTime() + DEFAULT_EXPIRATION_HOURS * 60 * 60 * 1000) / 1000).toFixed(0)),    
         });
     }catch(e){
@@ -66,8 +72,7 @@ app.post('/users/authenticate/refresh', jwtAuth, (req, res) => {
 app.get('/orgs/:org/ds', security.allowOrgOwnerOrPublicOrgOnly, orgs.handleListDatasets);
 
 app.post('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleList);
-app.post('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleDownload);
-app.post('/orgs/:org/ds/:ds/download/check', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleDownloadCheck);
+app.get('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleDownload);
 
 app.get('/orgs/:org/ds/:ds', security.allowDatasetOwnerOrPasswordOnly, dataset.handleInfo);
 app.delete('/orgs/:org/ds/:ds', security.allowDatasetOwnerOnly, dataset.handleDelete);
@@ -125,7 +130,6 @@ logger.info(`${packageJson.name} ${packageJson.version} - ${packageJson.descript
 let commands = [
     cb => {
         authProviders.initialize(config.auth, config.remoteAuth);
-        dataset.initialize();
 
         users.createDefaultUsers();
         server = app.listen(config.port, err => {
