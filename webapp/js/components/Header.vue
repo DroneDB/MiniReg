@@ -2,7 +2,8 @@
 <div id="header">
     <a :href="homeUrl" class="logo"><img style="width: 140px;" src="/images/banner.svg" alt="DroneDB"></a>
     <div class="right">
-        <a :href="downloadUrl" 
+        <a :href="downloadUrl"
+            @click="handleDownload"
             v-if="showDownload"
             title="Download"
             class="ui button primary download">
@@ -51,11 +52,16 @@ export default {
             const dataset = reg.Organization(org).Dataset(ds);
 
             if (this.selectedFiles.length > 0){
-                return dataset.downloadUrl(this.selectedFiles.map(f => {
+                const dUrl = dataset.downloadUrl(this.selectedFiles.map(f => {
                     const { path } = utils.parseUri(f.path);
-                    console.log(path);
                     return path;
                 }));
+
+                // Browser limit
+                if (dUrl.length < 2000) return dUrl;
+
+                // We'll use a POST request
+                else return "javascript:void(0)";
             }else{
                 return dataset.downloadUrl();
             }
@@ -94,6 +100,27 @@ export default {
       document.removeEventListener('click', this.hideMenu);
   },
   methods: {
+      handleDownload: async function(e){
+          if (this.downloadUrl === "javascript:void(0)"){
+              const { org, ds } = this.params;
+              const dataset = reg.Organization(org).Dataset(ds);
+
+              const { downloadUrl, error } = await dataset.download(this.selectedFiles.map(f => {
+                    const { path } = utils.parseUri(f.path);
+                    return path;
+              }));
+
+              if (error){
+                  // TODO: better error message?
+                  alert(error);
+              }else{
+                  location.href = downloadUrl;
+              }
+          }else{
+              // href will handle it
+          }
+      },
+
       onRegLogin: function(username){
           this.username = username;
           this.loggedIn = true;
