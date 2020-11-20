@@ -12,6 +12,11 @@
             <div class="ui middle aligned divided list">
                 <div class="item">
                     <div class="right floated">
+                        <button @click="handleRename(ds)" class="ui button icon small grey"
+                                :class="{loading: ds.renaming}"
+                                :disabled="ds.renaming">
+                                <i class="ui icon edit outline"></i>
+                        </button>
                         <button @click.stop="handleDelete(ds)" class="ui button icon small negative" 
                             :class="{loading: ds.deleting}"
                             :disabled="ds.deleting"><i class="ui icon trash"></i></button>
@@ -65,6 +70,25 @@ export default {
                     this.error = e.message;
                 }
                 this.$set(ds, 'deleting', false);
+            }
+        },
+
+        async handleRename(ds){
+            // TODO: add proper modal
+            var newSlug;
+
+            if (newSlug = window.prompt("Enter new dataset name:", ds.slug)){
+                this.$set(ds, 'renaming', true);
+                try{
+                    var newDs;
+                    if (newDs = await this.org.Dataset(ds.slug).rename(newSlug)){
+                        ds.slug = newDs.slug;
+                    }
+                }catch(e){
+                    console.log(e.message);
+                    this.error = e.message;
+                }
+                this.$set(ds, 'renaming', false);
             }
         },
 

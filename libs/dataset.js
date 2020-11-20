@@ -9,6 +9,9 @@ const archiver = require('archiver');
 
 const fsExists = util.promisify(fs.exists);
 const fsLstat = util.promisify(fs.lstat);
+const fsRename = util.promisify(fs.rename);
+
+const { Tag } = ddb;
 
 async function getDDBPath(req, res, next){
     const { org, ds } = req.params;
@@ -130,6 +133,42 @@ module.exports = {
             // include the size of the database (sum all indexes entries)
             
             res.json(entries);
+        }catch(e){
+            res.status(400).json({error: e.message});
+        }
+    }],
+
+    handleRename: [getDDBPath, async (req, res) => {
+        try{
+            if (!Tag.validComponent(req.body.slug)){
+                throw new Error(`Invalid name. must be valid ASCII and may contain lowercase 
+                    and uppercase letters, digits, underscores, periods and dashes.
+                    A tag name may not start with a period or a dash and may contain 
+                    a maximum of 128 characters.`);
+            }
+
+            const { org, ds } = req.params;
+            const newDs = req.body.slug;
+
+            
+            // Check if name already exists
+            const oldPath = path.join(Directories.ddbData, org, ds);
+            if (oldPath.indexOf(path.join(Directories.ddbData, org)) !== 0) throw new Error("Invalid dataset");
+            
+            const newPath = path.join(Directories.ddbData, org, newDs);
+            if (newPath === oldPath){
+                // Nothing to do
+                res.status(200).json({slug: newDs});
+                return;
+            }
+
+            if (await fsExists()){
+                throw new Error("A dataset with the same name already exist");
+            }
+
+            await fsRename(oldPath, newPath);
+
+            res.status(200).json({slug: newDs});
         }catch(e){
             res.status(400).json({error: e.message});
         }

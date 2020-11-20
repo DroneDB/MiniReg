@@ -40,6 +40,15 @@ window.addEventListener('load', function(){
         router
     }).$mount("#app");
 
+    Vue.config.errorHandler = function (err, vm, info) {
+        // Catch unauthorized error globally
+        if (err.message === "Unauthorized"){
+            router.push({name: "Login"}).catch(()=>{});
+        }else{
+            throw err;
+        }
+    }
+
 
     document.getElementById("main-loading").style.display = 'none';
 
