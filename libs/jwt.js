@@ -11,7 +11,7 @@ const DEFAULT_EXPIRATION_HOURS = 6;
 const readJwt = function(req, res, next){
     req.user = {};
     
-    let token = req.headers['Authorization'];
+    let token = req.headers['authorization'];
     if (token) token = token.replace(/^Bearer /i, "");
 
     if (!token){

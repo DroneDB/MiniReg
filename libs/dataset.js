@@ -282,7 +282,7 @@ module.exports = {
         try{
             if (!req.query.path) throw new Error("Invalid path");
 
-            const thumbSize = parseInt(req.query.size) || 256;
+            const thumbSize = parseInt(req.query.size) || 512;
             if (isNaN(thumbSize) || thumbSize < 1) throw new Error("Invalid size");
     
             const filePath = path.join(req.ddbPath, req.query.path);
