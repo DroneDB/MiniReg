@@ -276,5 +276,22 @@ module.exports = {
                 res.status(400).json({error: `Could not delete ${req.params.org}/${req.params.ds}`});
             }
         });
+    }],
+
+    handleThumb: [getDDBPath, async (req, res) => {
+        try{
+            if (!req.query.path) throw new Error("Invalid path");
+
+            const thumbSize = parseInt(req.query.size) || 256;
+            if (isNaN(thumbSize) || thumbSize < 1) throw new Error("Invalid size");
+    
+            const filePath = path.join(req.ddbPath, req.query.path);
+            if (filePath.indexOf(req.ddbPath) !== 0) throw new Error("Invalid path");
+
+            const thumbFile = await ddb.thumbs.getFromUserCache(filePath, { thumbSize });
+            res.sendFile(thumbFile);
+        }catch(e){
+            res.status(400).json({error: e.message});
+        }
     }]
 }

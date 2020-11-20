@@ -77,6 +77,7 @@ app.get('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetOwner
 app.post('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleDownload);
 
 app.post('/orgs/:org/ds/:ds/rename', formDataParser, security.allowDatasetOwnerOnly, dataset.handleRename);
+app.get('/orgs/:org/ds/:ds/thumb', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleThumb);
 
 
 app.get('/orgs/:org/ds/:ds', security.allowDatasetOwnerOrPasswordOnly, dataset.handleInfo);
