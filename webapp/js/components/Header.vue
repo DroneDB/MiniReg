@@ -25,6 +25,7 @@
 
 <script>
 import { utils } from 'ddb';
+import mouse from 'commonui/mouse';
 import reg from '../libs/sharedRegistry';
 
 export default {
@@ -77,7 +78,7 @@ export default {
       }
   },
   mounted: function(){
-      document.addEventListener('click', this.hideMenu);
+      mouse.on('click', this.hideMenu);
 
       reg.addEventListener('login', this.onRegLogin);
       reg.addEventListener('logout', this.onRegLogout);
@@ -93,11 +94,11 @@ export default {
           this.params = params;
       }
   },
-  unmounted: function(){
+  beforeDestroy: function(){
       reg.removeEventListener('login', this.onRegLogin);
       reg.removeEventListener('logout', this.onRegLogout);
 
-      document.removeEventListener('click', this.hideMenu);
+      mouse.off('click', this.hideMenu);
   },
   methods: {
       handleDownload: async function(e){

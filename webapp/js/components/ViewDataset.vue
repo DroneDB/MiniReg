@@ -4,14 +4,17 @@
 
     <div class="container main">
         <div class="sidebar">
-            <div class="tabs">
-                <div class="tab">
-                        <FileBrowser :rootNodes="rootNodes" 
-                            @selectionChanged="handleFileSelectionChanged" 
-                            @openProperties="handleFileBrowserOpenProperties"
-                            @unauthorized="handleUnauthorized" />
-                </div>
-            </div>
+            <TabSwitcher :tabs="tabs">
+                <template v-slot:filebrowser>
+                    <FileBrowser :rootNodes="rootNodes" 
+                        @selectionChanged="handleFileSelectionChanged" 
+                        @openProperties="handleFileBrowserOpenProperties"
+                        @unauthorized="handleUnauthorized" />
+                </template>
+                <template v-slot:settings>
+                    <Settings :dataset="dataset" />
+                </template>
+            </TabSwitcher>
         </div>
         <div class="container vertical">
             <Explorer :files="fileBrowserFiles" @folderOpened="handleFileSelectionChanged" @openProperties="handleExplorerOpenProperties" />
@@ -25,12 +28,14 @@
 
 <script>
 import Header from './Header.vue';
+import Settings from './Settings.vue';
 import Message from 'commonui/components/Message.vue';
 import FileBrowser from 'commonui/components/FileBrowser.vue';
 import Map from 'commonui/components/Map.vue';
 import Explorer from 'commonui/components/Explorer.vue';
 import Properties from 'commonui/components/Properties.vue';
-import pathutils from 'commonui/classes/pathutils';
+import TabSwitcher from 'commonui/components/TabSwitcher.vue';
+import { pathutils } from 'ddb';
 import icons from 'commonui/classes/icons';
 import reg from '../libs/sharedRegistry';
 
@@ -42,20 +47,33 @@ export default {
         FileBrowser,
         Map,
         Explorer,
-        Properties
+        Properties,
+        TabSwitcher,
+        Settings
     },
     data: function () {
         return {
             error: "",
+            tabs: [{
+                label: 'Settings',
+                icon: 'wrench',
+                key: 'settings' 
+            },{
+                label: 'Browser',
+                icon: 'folder open',
+                key: 'filebrowser' 
+            }],
             fileBrowserFiles: [],
             showProperties: false,
             selectedUsingFileBrowserList: false,
+            dataset: reg.Organization(this.$route.params.org)
+                               .Dataset(this.$route.params.ds)
         }
     },
     mounted: function(){
         document.getElementById("app").classList.add("fullpage");
     },
-    unmounted: function(){
+    beforeDestroy: function(){
         document.getElementById("app").classList.remove("fullpage");
     },
     computed: {
@@ -69,9 +87,7 @@ export default {
     },
     methods: {
         rootNodes: async function () {
-            const dataset = reg.Organization(this.$route.params.org)
-                               .Dataset(this.$route.params.ds);
-            const entries = await dataset.info();
+            const entries = await this.dataset.info();
 
             return entries.map(e => { return {
                     icon: icons.getForType(e.type),
