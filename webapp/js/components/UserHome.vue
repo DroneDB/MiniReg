@@ -7,22 +7,27 @@
     <div v-if="loading" class="loading">
         <i class="icon circle notch spin" />
     </div>
-    <div v-else v-for="ds in datasets" class="ui segments datasets">
-        <div class="ui segment">
-            <div class="ui middle aligned divided list">
-                <div class="item">
-                    <div class="right floated">
-                        <button @click="handleRename(ds)" class="ui button icon small grey"
-                                :class="{loading: ds.renaming}"
-                                :disabled="ds.renaming">
-                                <i class="ui icon edit outline"></i>
-                        </button>
-                        <button @click.stop="handleDelete(ds)" class="ui button icon small negative" 
-                            :class="{loading: ds.deleting}"
-                            :disabled="ds.deleting"><i class="ui icon trash"></i></button>
+    <div v-else>
+        <div v-if="datasets.length === 0">
+        There are no datasets here. Create one by using the <a href="https://dronedb.app/dashboard#downloads">DroneDB app</a>.
+        </div>
+        <div v-for="ds in datasets" class="ui segments datasets">
+            <div class="ui segment">
+                <div class="ui middle aligned divided list">
+                    <div class="item">
+                        <div class="right floated">
+                            <button @click="handleRename(ds)" class="ui button icon small grey"
+                                    :class="{loading: ds.renaming}"
+                                    :disabled="ds.renaming">
+                                    <i class="ui icon edit outline"></i>
+                            </button>
+                            <button @click.stop="handleDelete(ds)" class="ui button icon small negative" 
+                                :class="{loading: ds.deleting}"
+                                :disabled="ds.deleting"><i class="ui icon trash"></i></button>
+                        </div>
+                        
+                        <a href="javascript:void(0)" @click.stop="viewDataset(ds)"><i class="large database icon"></i> {{ds.slug}}</a>
                     </div>
-                    
-                    <a href="javascript:void(0)" @click.stop="viewDataset(ds)"><i class="large database icon"></i> {{ds.slug}}</a>
                 </div>
             </div>
         </div>
