@@ -7,7 +7,7 @@
         <ul>
             <li>We will not guarantee data retention! Your data might be removed without notice.</li>
             <li>Do not store sensitive data, as there could be bugs.</li>
-            <li>Have fun and give us your <a href="https://dronedb.app/contact">feedback</a> ? :)</li>
+            <li>Features are still missing! This is a chance for you to <a href="https://dronedb.app/contact">let us know what you'd like to see added next</a> :)</li>
         </ul>
     </Alert>
 

@@ -111,6 +111,7 @@ export default {
 
 <style scoped>
 .settings{
+    min-height: 200px;
     padding: 8px;
     margin-top: 12px;
     .visibility{
