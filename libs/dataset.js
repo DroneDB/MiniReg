@@ -293,5 +293,15 @@ module.exports = {
         }catch(e){
             res.status(400).json({error: e.message});
         }
+    }],
+
+    handleChattr: [getDDBPath, async (req, res) => {
+        try{
+            if (!req.body.attrs) throw new Error("Missing attributes");
+            
+            res.status(200).json(await ddb.chattr(req.ddbPath, JSON.parse(req.body.attrs)));
+        }catch(e){
+            res.status(400).json({error: e.message});
+        }
     }]
 }

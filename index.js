@@ -79,6 +79,8 @@ app.post('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetOwne
 app.post('/orgs/:org/ds/:ds/rename', formDataParser, security.allowDatasetOwnerOnly, dataset.handleRename);
 app.get('/orgs/:org/ds/:ds/thumb', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleThumb);
 
+app.post('/orgs/:org/ds/:ds/chattr', formDataParser, security.allowDatasetOwnerOnly, dataset.handleChattr);
+
 
 app.get('/orgs/:org/ds/:ds', security.allowDatasetOwnerOrPasswordOnly, dataset.handleInfo);
 app.delete('/orgs/:org/ds/:ds', security.allowDatasetOwnerOnly, dataset.handleDelete);

@@ -10,7 +10,8 @@
                     <div class="field">
                         <div class="ui left icon input">
                             <i class="user icon"></i>
-                            <input v-on:keyup.enter="login" v-model="username" autocomplete="off" type="text" name="username" placeholder="Username">
+                            <input v-on:keyup.enter="login" v-model="username" autocomplete="off" type="text" name="username" 
+                                    placeholder="Username" autocorrect="off" autocapitalize="none">
                         </div>
                     </div>
                     <div class="field">
