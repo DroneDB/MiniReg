@@ -71,18 +71,18 @@ app.post('/users/authenticate/refresh', jwtAuth, (req, res) => {
 
 app.get('/orgs/:org/ds', security.allowOrgOwnerOrPublicOrgOnly, orgs.handleListDatasets);
 
-app.post('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleList);
+app.post('/orgs/:org/ds/:ds/list', formDataParser, security.allowDatasetRead, dataset.handleList);
 
-app.get('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleDownload);
-app.post('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleDownload);
+app.get('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetRead, dataset.handleDownload);
+app.post('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetRead, dataset.handleDownload);
 
 app.post('/orgs/:org/ds/:ds/rename', formDataParser, security.allowDatasetOwnerOnly, dataset.handleRename);
-app.get('/orgs/:org/ds/:ds/thumb', formDataParser, security.allowDatasetOwnerOrPasswordOnly, dataset.handleThumb);
+app.get('/orgs/:org/ds/:ds/thumb', formDataParser, security.allowDatasetRead, dataset.handleThumb);
 
 app.post('/orgs/:org/ds/:ds/chattr', formDataParser, security.allowDatasetOwnerOnly, dataset.handleChattr);
 
 
-app.get('/orgs/:org/ds/:ds', security.allowDatasetOwnerOrPasswordOnly, dataset.handleInfo);
+app.get('/orgs/:org/ds/:ds', security.allowDatasetRead, dataset.handleInfo);
 app.delete('/orgs/:org/ds/:ds', security.allowDatasetOwnerOnly, dataset.handleDelete);
 
 // Not part of official API

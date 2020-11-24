@@ -93,6 +93,8 @@ async function handleDownloadTask(res, dt){
 }
 
 module.exports = {
+    getDDBPath,
+    
     handleDownloadFile: async (req, res) => {
         const { uuid } = req.params;
 

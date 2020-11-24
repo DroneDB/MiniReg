@@ -55,13 +55,13 @@ export default {
         return {
             error: "",
             tabs: [{
-                label: 'Settings',
-                icon: 'wrench',
-                key: 'settings' 
-            },{
                 label: 'Browser',
                 icon: 'folder open',
                 key: 'filebrowser' 
+            },{
+                label: 'Settings',
+                icon: 'wrench',
+                key: 'settings' 
             }],
             fileBrowserFiles: [],
             showProperties: false,

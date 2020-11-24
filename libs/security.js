@@ -1,5 +1,8 @@
 const { readJwt } = require('./jwt');
 const { PUBLIC_ORG_NAME } = require('./tag');
+const logger = require('./logger');
+const { getDDBPath } = require('./dataset');
+const ddb = require('../vendor/ddb');
 
 const checkOrgOwner = function(req, res){
     const { org } = req.params;
@@ -50,9 +53,39 @@ const allowDatasetOwnerOrPasswordOnly = [readJwt, function(req, res, next){
     // TODO!
 }];
 
+const allowDatasetRead = [readJwt, getDDBPath, async function(req, res, next){
+    if (checkOrgOwner(req, res)){
+        next(); // Grant
+        return;
+    }
+
+    const { org } = req.params;
+
+    if (org === PUBLIC_ORG_NAME){ // && !password (TODO)
+        next(); // Grant
+        return;
+    }
+
+    try{
+        // TODO: should this be cached?
+        const info = await ddb.info(req.ddbPath);
+        if (info[0].meta.public){
+            next();
+            return;
+        }
+    }catch(e){
+        logger.error(e);
+    }
+
+    res.status(401).json({error: "Unauthorized"});
+
+    // Check password
+    // TODO!
+}];
 
 module.exports = {
     allowOrgOwnerOrPublicOrgOnly,
     allowDatasetOwnerOrPasswordOnly,
-    allowDatasetOwnerOnly
+    allowDatasetOwnerOnly,
+    allowDatasetRead
 };
