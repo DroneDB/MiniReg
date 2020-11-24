@@ -1,6 +1,16 @@
 <template>
 <div id="header">
     <a :href="homeUrl" class="logo"><img style="width: 140px;" src="/images/banner.svg" alt="DroneDB"></a>
+    
+    <a class="ui orange label alert" @click="showDisclaimer = !showDisclaimer"><i class="icon warning"></i> This is a test hub</a>
+    <Alert v-if="showDisclaimer" @onClose="showDisclaimer = false" title="This is a Test Hub">
+        <ul>
+            <li>We will not guarantee data retention! Your data might be removed without notice.</li>
+            <li>Do not store sensitive data, as there could be bugs.</li>
+            <li>Have fun and give us your <a href="https://dronedb.app/contact">feedback</a> ? :)</li>
+        </ul>
+    </Alert>
+
     <div class="right">
         <a :href="downloadUrl"
             @click="handleDownload"
@@ -27,17 +37,21 @@
 import { utils } from 'ddb';
 import mouse from 'commonui/mouse';
 import reg from '../libs/sharedRegistry';
+import Alert from 'commonui/components/Alert';
 
 export default {
   components: {
+      Alert
   },
   data: function(){
       return {
           username: reg.getUsername(),
           loggedIn: reg.isLoggedIn(),
           params: this.$route.params,
-          showDownload: !!this.$route.params.ds && reg.isLoggedIn(),
-          selectedFiles: []
+          showDownload: !!this.$route.params.ds,
+          selectedFiles: [],
+
+          showDisclaimer: false
       }
   },
   computed: {
@@ -90,7 +104,7 @@ export default {
           // TODO: we might need have more complex 
           // logic in the future to see who has access
           // to download files?
-          this.showDownload = !!params.ds && reg.isLoggedIn(); 
+          this.showDownload = !!params.ds; 
           this.params = params;
       }
   },
@@ -155,6 +169,12 @@ export default {
 </script>
 
 <style scoped>
+.alert{
+    height: 26px;
+    position: relative;
+    top: 3px;
+    margin-left: 8px;
+}
 #header{
     margin: 0;
     padding: 8px;

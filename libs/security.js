@@ -18,6 +18,8 @@ const allowOrgOwnerOrPublicOrgOnly = [readJwt, function(req, res, next){
         return;
     }
 
+    const { org } = req.params;
+
     if (org === PUBLIC_ORG_NAME){
         next(); // Grant
         return;
