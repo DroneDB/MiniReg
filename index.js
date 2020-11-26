@@ -150,7 +150,7 @@ let commands = [
 
         users.createDefaultUsers();
 
-        if (config.sslCert && config.sslKey){
+        if (config.ssl){
             const https = require('https');
             const key  = fs.readFileSync(config.sslKey, 'utf8');
             const cert = fs.readFileSync(config.sslCert, 'utf8');

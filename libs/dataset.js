@@ -5,6 +5,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const logger = require('./logger');
 const util = require('util');
+const config = require('../config');
 const archiver = require('archiver');
 
 const fsExists = util.promisify(fs.exists);
@@ -128,12 +129,9 @@ module.exports = {
             // Override depth and path
             entry.depth = 0;
 
-            // TODO: SSL check
-            entry.path = `ddb+unsafe://${req.headers.host}/${req.params.org}/${req.params.ds}`;
+            const proto = config.ssl ? "ddb" : "ddb+unsafe";
+            entry.path = `${proto}://${req.headers.host}/${req.params.org}/${req.params.ds}`;
 
-            // TODO: entry.size is zero (DDB is a folder), but we should probably
-            // include the size of the database (sum all indexes entries)
-            
             res.json(entries);
         }catch(e){
             res.status(400).json({error: e.message});

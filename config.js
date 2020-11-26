@@ -62,6 +62,7 @@ config.auth = argv.auth || argv.a || fromConfigFile("auth", "local");
 config.remoteAuth = argv['remote-auth'] || fromConfigFile("remote-auth", "https://dronedb.app");
 config.sslCert = argv['ssl-cert'] || fromConfigFile("ssl-cert", "");
 config.sslKey = argv['ssl-key'] || fromConfigFile("ssl-key", "");
+config.ssl = config.sslCert && config.sslKey;
 config.testDropUploads = argv['test-drop-uploads'] || fromConfigFile("testDropUploads", false);
 config.powercycle = argv.powercycle || fromConfigFile("powercycle", false);
 
