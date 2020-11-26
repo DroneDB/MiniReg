@@ -154,6 +154,7 @@ let commands = [
             const https = require('https');
             const key  = fs.readFileSync(config.sslKey, 'utf8');
             const cert = fs.readFileSync(config.sslCert, 'utf8');
+            logger.info("Using SSL");
             server = https.createServer({ key, cert }, app);
         }else{
             const http = require('http');
