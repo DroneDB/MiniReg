@@ -11,6 +11,7 @@ const hbhelpers = require('./webapp/views/helpers/helpers');
 const logger = require('./libs/logger');
 const async = require('async');
 const authProviders = require('./libs/authProviders');
+const Directories = require('./libs/Directories');
 
 const express = require('express');
 const app = express();
@@ -136,6 +137,14 @@ if (config.test) {
 logger.info(`${packageJson.name} ${packageJson.version} - ${packageJson.description}`);
 
 let commands = [
+    cb => {
+        // Assure data dir exists
+        if (!fs.existsSync(Directories.data)){
+            fs.mkdirSync(Directories.data);
+            logger.info(`Created ${Directories.data}`);
+        }
+        cb();
+    },
     cb => {
         authProviders.initialize(config.auth, config.remoteAuth);
 
