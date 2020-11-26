@@ -149,7 +149,18 @@ let commands = [
         authProviders.initialize(config.auth, config.remoteAuth);
 
         users.createDefaultUsers();
-        server = app.listen(config.port, err => {
+
+        if (config.sslCert && config.sslKey){
+            const https = require('https');
+            const key  = fs.readFileSync(config.sslKey, 'utf8');
+            const cert = fs.readFileSync(config.sslCert, 'utf8');
+            server = https.createServer({ key, cert }, app);
+        }else{
+            const http = require('http');
+            server = http.createServer(app);
+        }
+
+        server.listen(config.port, err => {
             if (!err) logger.info('Server has started on port ' + String(config.port));
             cb(err);
         });

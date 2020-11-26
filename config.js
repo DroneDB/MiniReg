@@ -14,6 +14,8 @@ Options:
 	--log-level <logLevel>	Set log level verbosity (default: info)
 	-a, --auth <provider>	Authentication provider to use. [local|remote] (default: local)
 	--remote-auth <url>	Remote authentication URL. (default: https://dronedb.app)
+	--ssl-cert	Path to cert for SSL. (default: none)
+	--ssl-key	Path to key for SSL. (default: none)
 	--cleanup-uploads-after <number> Number of minutes that elapse before deleting unfinished uploads. Set this value to the maximum time you expect a dataset to be uploaded. (default: 2880) 
 	--test Enable test mode. This can be useful during development or testing (default: false)
 	--test-drop-uploads	If test mode is enabled, drop /task/new/upload requests with 50% probability. (default: false)
@@ -58,6 +60,8 @@ config.cleanupUploadsAfter = parseInt(argv['cleanup-uploads-after'] || fromConfi
 config.test = argv.test || fromConfigFile("test", false);
 config.auth = argv.auth || argv.a || fromConfigFile("auth", "local");
 config.remoteAuth = argv['remote-auth'] || fromConfigFile("remote-auth", "https://dronedb.app");
+config.sslCert = argv['ssl-cert'] || fromConfigFile("ssl-cert", "");
+config.sslKey = argv['ssl-key'] || fromConfigFile("ssl-key", "");
 config.testDropUploads = argv['test-drop-uploads'] || fromConfigFile("testDropUploads", false);
 config.powercycle = argv.powercycle || fromConfigFile("powercycle", false);
 
