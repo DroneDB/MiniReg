@@ -248,6 +248,12 @@ module.exports = {
                                  .catch(e => cb(e));
             },
             cb => {
+                // Set public
+                ddb.chattr(srcPath, { public: true })
+                        .then(() => cb())
+                        .catch(e => cb(e));
+            },
+            cb => {
                 res.json({token: req.id, maxUploadChunkSize: 2147483647});
                 cb();
             }
