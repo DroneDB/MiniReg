@@ -8,6 +8,9 @@ const Directories = require('./Directories');
 module.exports = {
     // api: router,
     initialize: function(){
+        // init
+        this.db = require('better-sqlite3')(path.join(Directories.data, 'sqlite3.db'), {});
+        
         const migFile = path.join(Directories.data, "migrated.txt");
         if (!fs.existsSync(migFile)){
             fs.writeFileSync(migFile, JSON.stringify({currentMigration: -1}), 'utf8');
@@ -19,14 +22,11 @@ module.exports = {
             const n = parseInt(m.substr(0, 4));
             if (currentMigration < n){
                 logger.info(`Executing ${m}...`);
-                db.exec(fs.readFileSync(path.join("migrations", m), 'utf8'));
+                this.db.exec(fs.readFileSync(path.join("migrations", m), 'utf8'));
                 currentMigration = n;
                 fs.writeFileSync(migFile, JSON.stringify({currentMigration}), 'utf8');
             }
         });
-
-        // init
-        this.db = require('better-sqlite3')(path.join(Directories.data, 'sqlite3.db'), {});
     },
     fetchOne: function(query, ...params){
         return this.db.prepare(query).get(...params);
