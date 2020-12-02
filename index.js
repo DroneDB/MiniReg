@@ -7,6 +7,7 @@ const users = require('./libs/users');
 const exphbs = require('express-handlebars');
 const cookieParser = require('cookie-parser');
 const hbhelpers = require('./webapp/views/helpers/helpers');
+const db = require('./libs/db');
 
 const logger = require('./libs/logger');
 const async = require('async');
@@ -18,7 +19,8 @@ const app = express();
 
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const { jwtAuth, DEFAULT_EXPIRATION_HOURS } = require('./libs/jwt');
+const jwt = require('./libs/jwt');
+const { jwtAuth, DEFAULT_EXPIRATION_HOURS } = jwt;
 const security = require('./libs/security');
 const share = require('./libs/share');
 const dataset = require('./libs/dataset');
@@ -146,6 +148,9 @@ let commands = [
         cb();
     },
     cb => {
+        db.initialize();
+        jwt.initialize();
+        
         authProviders.initialize(config.auth, config.remoteAuth);
 
         users.createDefaultUsers();

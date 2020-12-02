@@ -1,5 +1,5 @@
 const logger = require('./logger');
-const { db } = require('./db');
+const db = require('./db');
 const crypto = require('crypto');
 const axios = require('axios');
 

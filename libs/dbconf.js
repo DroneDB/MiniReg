@@ -1,8 +1,8 @@
-const { db, fetchOne } = require('./db');
+const db = require('./db');
 
 module.exports = {
     get: function(key){
-        return (fetchOne('SELECT value FROM config WHERE key = ?', key) || {}).value;
+        return (db.fetchOne('SELECT value FROM config WHERE key = ?', key) || {}).value;
     },
 
     set: function(key, value){

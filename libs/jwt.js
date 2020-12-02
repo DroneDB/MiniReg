@@ -2,11 +2,9 @@ const jwt = require('jsonwebtoken');
 const dbconf = require('./dbconf');
 const crypto = require('crypto');
 
-// Generate secret
-dbconf.setIfNotExists("jwt_secret", crypto.randomBytes(32).toString('hex'));
-const secret = dbconf.get("jwt_secret");
-
 const DEFAULT_EXPIRATION_HOURS = 6;
+
+let secret = null;
 
 const readJwt = function(req, res, next){
     req.user = {};
@@ -33,6 +31,11 @@ const readJwt = function(req, res, next){
 
 module.exports = {
     DEFAULT_EXPIRATION_HOURS,
+    initialize: function(){
+        dbconf.setIfNotExists("jwt_secret", crypto.randomBytes(32).toString('hex'));
+        secret = dbconf.get("jwt_secret");
+    },
+
     readJwt,
 
     jwtAuth: [readJwt, function(req, res, next){
