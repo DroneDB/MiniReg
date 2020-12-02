@@ -4,7 +4,7 @@
   "description": "Toy DroneDB Registry API",
   "main": "index.js",
   "scripts": {
-    "postinstall": "cd vendor/ddb && npm install",
+    "postinstall": "cd vendor/ddb && npm install && cd ../..",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
