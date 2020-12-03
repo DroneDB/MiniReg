@@ -181,14 +181,15 @@ module.exports = {
             cb => {
                 tagComp = tag.parseOrCreateTag(body.tag);
                 destDir = path.join(Directories.ddbData, tagComp.organization, tagComp.dataset)
+                const parentDir = path.join(destDir, "..");
 
                 fs.stat(destDir, (err, stat) => {
-                    if (err && err.code === 'ENOENT') cb();
+                    if (err && err.code === 'ENOENT') fs.mkdir(parentDir, {recursive: true}, cb);
                     else{
                         // Dir already exist, remove it
                         rmdir(destDir, err => {
                             if (err) cb(err);
-                            else cb();
+                            else fs.mkdir(parentDir, {recursive: true}, cb);
                         });
                     }
                 });
