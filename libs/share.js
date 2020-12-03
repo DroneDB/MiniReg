@@ -183,12 +183,12 @@ module.exports = {
                 destDir = path.join(Directories.ddbData, tagComp.organization, tagComp.dataset)
 
                 fs.stat(destDir, (err, stat) => {
-                    if (err && err.code === 'ENOENT') fs.mkdir(destDir, {recursive: true}, cb);
+                    if (err && err.code === 'ENOENT') cb();
                     else{
                         // Dir already exist, remove it
                         rmdir(destDir, err => {
                             if (err) cb(err);
-                            else fs.mkdir(destDir, {recursive: true}, cb);
+                            else cb();
                         });
                     }
                 });
