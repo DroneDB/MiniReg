@@ -4,3 +4,6 @@
 [submodule "webapp/vendor/commonui"]
 	path = webapp/vendor/commonui
 	url = https://github.com/DroneDB/CommonUI
+[submodule "vendor/hub"]
+	path = vendor/hub
+	url = https://github.com/DroneDB/Hub

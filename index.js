@@ -3,9 +3,9 @@ const fs = require('fs');
 const config = require('./config.js');
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
 const users = require('./libs/users');
-const exphbs = require('express-handlebars');
+// const exphbs = require('express-handlebars');
+// const hbhelpers = require('./webapp/views/helpers/helpers');
 const cookieParser = require('cookie-parser');
-const hbhelpers = require('./webapp/views/helpers/helpers');
 const db = require('./libs/db');
 
 const logger = require('./libs/logger');
@@ -25,16 +25,16 @@ const share = require('./libs/share');
 const dataset = require('./libs/dataset');
 const orgs = require('./libs/orgs');
 
-const hbs = exphbs.create({
-    helpers: hbhelpers,
-    extname: '.hbs'
-});
-app.engine('.hbs', hbs.engine);
-app.set('view engine', '.hbs');
-app.set('views', 'webapp/views');
-if (process.env.NODE_ENV === 'production') app.enable('view cache');
+// const hbs = exphbs.create({
+//     helpers: hbhelpers,
+//     extname: '.hbs'
+// });
+// app.engine('.hbs', hbs.engine);
+// app.set('view engine', '.hbs');
+// app.set('views', 'webapp/views');
+// if (process.env.NODE_ENV === 'production') app.enable('view cache');
 
-app.use(express.static('webapp/public'));
+app.use(express.static('vendor/hub/build'));
 app.use(cookieParser());
 
 const formDataParser = [multer().none(), bodyParser.urlencoded({extended: false})];
@@ -88,12 +88,11 @@ app.get('/orgs/:org/ds/:ds', security.allowDatasetRead, dataset.handleInfo);
 app.delete('/orgs/:org/ds/:ds', security.allowDatasetOwnerOnly, dataset.handleDelete);
 
 // Not part of official API
-// These are views
 app.get('/r/:org/:ds?', (req, res) => {
-    res.render('app');
+    res.sendFile(__dirname + '/vendor/hub/build/index.html')
 });
 app.get('/login', (req, res) => {
-    res.render('app');
+    res.sendFile(__dirname + '/vendor/hub/build/index.html')
 });
 app.get('/', (req, res) => {
     res.redirect(301, '/login');
