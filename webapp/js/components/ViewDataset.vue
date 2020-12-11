@@ -2,7 +2,7 @@
 <div id="browser" class="cui app">
     <Message bindTo="error" />
 
-    <div class="container main">
+    <Panel split="vertical" class="container main" amount="25%">
         <div class="sidebar">
             <TabSwitcher :tabs="tabs">
                 <template v-slot:filebrowser>
@@ -16,12 +16,12 @@
                 </template>
             </TabSwitcher>
         </div>
-        <div class="container vertical">
+        <Panel split="horizontal" class="container vertical" amount="50%">
             <Explorer :files="fileBrowserFiles" @folderOpened="handleFileSelectionChanged" @openProperties="handleExplorerOpenProperties" />
             <Map :files="fileBrowserFiles" />
-        </div>
+        </Panel>
         <Properties v-if="showProperties" :files="selectedFiles" @onClose="handleCloseProperties" />
-    </div>
+    </Panel>
 </div>
 </div>
 </template>
@@ -35,6 +35,8 @@ import Map from 'commonui/components/Map.vue';
 import Explorer from 'commonui/components/Explorer.vue';
 import Properties from 'commonui/components/Properties.vue';
 import TabSwitcher from 'commonui/components/TabSwitcher.vue';
+import Panel from 'commonui/components/Panel.vue';
+
 import { pathutils } from 'ddb';
 import icons from 'commonui/classes/icons';
 import reg from '../libs/sharedRegistry';
@@ -49,7 +51,8 @@ export default {
         Explorer,
         Properties,
         TabSwitcher,
-        Settings
+        Settings,
+        Panel
     },
     data: function () {
         return {
