@@ -80,6 +80,7 @@ app.post('/orgs/:org/ds/:ds/download', formDataParser, security.allowDatasetRead
 
 app.post('/orgs/:org/ds/:ds/rename', formDataParser, security.allowDatasetOwnerOnly, dataset.handleRename);
 app.get('/orgs/:org/ds/:ds/thumb', formDataParser, security.allowDatasetRead, dataset.handleThumb);
+app.get('/orgs/:org/ds/:ds/tiles/:tz/:tx/:ty.png', formDataParser, security.allowDatasetRead, dataset.handleTile);
 
 app.post('/orgs/:org/ds/:ds/chattr', formDataParser, security.allowDatasetOwnerOnly, dataset.handleChattr);
 

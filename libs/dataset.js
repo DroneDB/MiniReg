@@ -295,6 +295,35 @@ module.exports = {
         }
     }],
 
+    handleTile: [getDDBPath, async (req, res) => {
+        try{
+            if (!req.query.path) throw new Error("Invalid path");
+            let { tz, tx, ty } = req.params;
+            let tileSize = 256;
+            
+            tz = parseInt(tz);
+            if (isNaN(tz)) throw new Error("Invalid tz");
+            tx = parseInt(tx);
+            if (isNaN(tx)) throw new Error("Invalid tx");
+
+            if (typeof ty === "string"){
+                if (ty.endsWith("@2x")){
+                    tileSize *= 2;
+                }
+            }
+            ty = parseInt(ty);
+            if (isNaN(ty)) throw new Error("Invalid ty");
+
+            const filePath = path.join(req.ddbPath, req.query.path);
+            if (filePath.indexOf(req.ddbPath) !== 0) throw new Error("Invalid path");
+
+            const tileFile = await ddb.tile.getFromUserCache(filePath, tz, tx, ty, { tileSize, tms: true });
+            res.sendFile(tileFile);
+        }catch(e){
+            res.status(400).json({error: e.message});
+        }
+    }],
+
     handleChattr: [getDDBPath, async (req, res) => {
         try{
             if (!req.body.attrs) throw new Error("Missing attributes");
