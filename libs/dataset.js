@@ -66,7 +66,13 @@ async function handleDownloadTask(res, dt){
     });
 
     if (!dt.useZip && dt.paths.length === 1){
-        res.download(path.resolve(path.join(dt.ddbPath, dt.paths[0])), dt.friendlyName);
+        if (dt.inline){
+            res.sendFile(path.resolve(path.join(dt.ddbPath, dt.paths[0])), {
+                headers: { "content-disposition": `inline; filename=${dt.friendlyName}` }
+            });
+        }else{
+            res.download(path.resolve(path.join(dt.ddbPath, dt.paths[0])), dt.friendlyName);
+        }
     }else{
         res.attachment(dt.friendlyName);
 
@@ -180,6 +186,8 @@ module.exports = {
         let paths = [];
         if (req.method === "GET" && typeof req.query.path === "string"){
             paths = req.query.path.split(',');
+        }else if (req.method === "GET" && typeof req.params.path !== undefined){
+            paths = req.params.path;
         }else if (req.method === "POST" && req.body.path){
             paths = req.body.path;
         }
@@ -218,6 +226,7 @@ module.exports = {
                 paths: [file],
                 ddbPath: req.ddbPath,
                 useZip: false,
+                inline: !!req.query.inline,
                 friendlyName: path.basename(file),
                 created: new Date().getTime()
             };
@@ -254,6 +263,7 @@ module.exports = {
                     addAll: paths.length === 0,
                     ddbPath: req.ddbPath,
                     useZip: true,
+                    inline: false,
                     friendlyName: `${org}-${ds}.zip`,
                     created: new Date().getTime()
                 };
