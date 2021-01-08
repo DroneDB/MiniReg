@@ -186,7 +186,7 @@ module.exports = {
         let paths = [];
         if (req.method === "GET" && typeof req.query.path === "string"){
             paths = req.query.path.split(',');
-        }else if (req.method === "GET" && typeof req.params.path !== undefined){
+        }else if (req.method === "GET" && req.params.path !== undefined){
             paths = req.params.path;
         }else if (req.method === "POST" && req.body.path){
             paths = req.body.path;
