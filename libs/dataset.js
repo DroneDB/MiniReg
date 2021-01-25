@@ -197,7 +197,11 @@ module.exports = {
         // Generate UUID
         const hash = crypto.createHash('sha256');
         const uuid = hash.update(`${Math.random()}/${new Date().getTime()}`).digest("hex");
-        const useZip = (paths.length === 0) || (paths.length > 1);
+        let isSingleDirectory = false;
+        if (paths.length === 1){
+            isSingleDirectory = (await fsLstat(path.join(req.ddbPath, paths[0]))).isDirectory();
+        }
+        const useZip = (paths.length === 0) || (paths.length > 1) || isSingleDirectory;
 
         const die = async (error) => {
             logger.error(error);
