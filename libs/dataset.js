@@ -187,7 +187,7 @@ module.exports = {
         if (req.method === "GET" && typeof req.query.path === "string"){
             paths = req.query.path.split(',');
         }else if (req.method === "GET" && req.params.path !== undefined){
-	    paths = (new URL(`http://localhost${req.url}`)).pathname.substring(`/orgs/${org}/ds/${ds}/download/`.length);
+	        paths = (new URL(`http://localhost${req.url}`)).pathname.substring(`/orgs/${org}/ds/${ds}/download/`.length);
         }else if (req.method === "POST" && req.body.path){
             paths = req.body.path;
         }
