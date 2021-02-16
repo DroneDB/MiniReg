@@ -28,13 +28,9 @@ module.exports = {
         db.prepare(`INSERT INTO users (username, salt, password) VALUES (?, ?, ?)`).run(username, salt, pwd);
     },
 
-    login: async function(username, password){
-        const metadata = await authProviders.get().authenticate(username, password);
-        const signObj = {
-            username, metadata
-        };
-
-        return jwt.sign(signObj);
+    login: async function(username, password, token = null){
+        const res = await authProviders.get().authenticate(username, password, token);
+        return { token: jwt.sign(res), username: res.username };
     },
 
     refreshToken: function(signObj){

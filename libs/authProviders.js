@@ -23,7 +23,9 @@ class LocalAuthProvider extends AbstractAuthProvider{
         logger.info("Using local DB authentication");
     }
 
-    async authenticate(username, password){
+    async authenticate(username, password, token){
+        if (token) throw new Error("Token authentication is not available with local auth provider");
+
         // Authenticate against database
         let r = db.prepare("SELECT salt FROM users WHERE username = ?").get(username);
         if (!r) throw new Error("Unauthorized");
@@ -31,7 +33,13 @@ class LocalAuthProvider extends AbstractAuthProvider{
         r = db.prepare("SELECT username, metadata FROM users WHERE username = ? AND password = ?").get(username, crypto.createHmac('sha512', r.salt).update(password).digest("base64"));
         if (!r) throw new Error("Unauthorized");
 
-        return r.metadata ? JSON.parse(r.metadata) : {};
+        let res = { username };
+        if (r.metadata){
+            for (let k of Object.keys(r.metadata)){
+                res[k] = r.metadata[k];
+            }
+        }
+        return res;
     }
 };
 
@@ -48,8 +56,13 @@ class RemoteAuthProvider extends AbstractAuthProvider{
         return `${this.urlBase}${url}`
     }
 
-    async authenticate(username, password){
-        let response = await axios.post(this.urlFor('/r/auth'), { username, password }, { 
+    async authenticate(username, password, token){
+        const params = {};
+        if (username !== undefined) params.username = username;
+        if (password !== undefined) params.password = password;
+        if (token !== undefined) params.token = token;
+
+        let response = await axios.post(this.urlFor('/r/auth'), params, { 
             timeout: this.timeout,
             validateStatus: () => true
         });

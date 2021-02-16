@@ -47,10 +47,11 @@ app.post('/share/commit/:uuid', jwtAuth, share.getUUID, share.handleCommit);
 
 app.post('/users/authenticate', formDataParser, async (req, res) => {
     try{
-        const token = await users.login(req.body.username, req.body.password);
+        const userInfo = await users.login(req.body.username, req.body.password, req.body.token);
 
         res.json({
-            token,
+            username: userInfo.username,
+            token: userInfo.token,
             expires: parseInt(((new Date().getTime() + DEFAULT_EXPIRATION_HOURS * 60 * 60 * 1000) / 1000).toFixed(0)),    
         });
     }catch(e){
