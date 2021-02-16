@@ -18,18 +18,18 @@ module.exports = {
         const r = db.prepare("SELECT * FROM users WHERE username = ?").get('admin');
         if (!r){
             logger.info("Adding default admin user");
-            this.addUser('admin', 'password');
+            this.addUser('admin', 'password', ['admin', 'standard']);
         }
     },
 
-    addUser: function(username, password){
+    addUser: function(username, password, roles){
         const salt = generateSalt();
         const pwd = crypto.createHmac('sha512', salt).update(password).digest("base64");
-        db.prepare(`INSERT INTO users (username, salt, password) VALUES (?, ?, ?)`).run(username, salt, pwd);
+        db.prepare(`INSERT INTO users (username, salt, password, roles) VALUES (?, ?, ?, ?)`).run(username, salt, pwd, "|" + roles.join("|") + "|");
     },
 
-    login: async function(username, password){
-        const metadata = await authProviders.get().authenticate(username, password);
+    login: async function(username, password, impersonate){
+        const metadata = await authProviders.get().authenticate(username, password, impersonate);
         const signObj = {
             username, metadata
         };

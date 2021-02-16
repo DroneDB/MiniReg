@@ -11,7 +11,7 @@ class AbstractAuthProvider{
 
     // This function should return the user's metadata
     // if login is successful, otherwise raise an error
-    async authenticate(username, password){
+    async authenticate(username, password, impersonate){
         throw new Error("Not Implemented");
     }
 };
@@ -28,10 +28,20 @@ class LocalAuthProvider extends AbstractAuthProvider{
         let r = db.prepare("SELECT salt FROM users WHERE username = ?").get(username);
         if (!r) throw new Error("Unauthorized");
 
-        r = db.prepare("SELECT username, metadata FROM users WHERE username = ? AND password = ?").get(username, crypto.createHmac('sha512', r.salt).update(password).digest("base64"));
+        r = db.prepare("SELECT username, metadata, roles FROM users WHERE username = ? AND password = ?").get(username, crypto.createHmac('sha512', r.salt).update(password).digest("base64"));
         if (!r) throw new Error("Unauthorized");
+        
+        let meta = {};
+        if (r.metadata){
+            meta = JSON.parse(r.metadata);
+        }
+        if (r.roles){
+            meta.roles = r.roles.split("|").filter(r => r !== "");
+        }else{
+            r.roles = ["standard"];
+        }
 
-        return r.metadata ? JSON.parse(r.metadata) : {};
+        return meta;
     }
 };
 
