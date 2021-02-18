@@ -90,13 +90,14 @@ app.post('/orgs/:org/ds/:ds/chattr', formDataParser, security.allowDatasetOwnerO
 app.get('/orgs/:org/ds/:ds', security.allowDatasetRead, dataset.handleInfo);
 app.delete('/orgs/:org/ds/:ds', security.allowDatasetOwnerOnly, dataset.handleDelete);
 
+const webappRouteHandler = (req, res) => {
+    res.sendFile(__dirname + '/vendor/hub/build/index.html');
+};
+
 // Not part of official API
-app.get('/r/:org/:ds?', (req, res) => {
-    res.sendFile(__dirname + '/vendor/hub/build/index.html')
-});
-app.get('/login', (req, res) => {
-    res.sendFile(__dirname + '/vendor/hub/build/index.html')
-});
+app.get('/r/:org/:ds?', webappRouteHandler);
+app.get('/login', webappRouteHandler);
+app.get('/upload', webappRouteHandler);
 app.get('/', (req, res) => {
     res.redirect(301, '/login');
 });

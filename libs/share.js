@@ -75,26 +75,30 @@ module.exports = {
     },
 
     uploadFile: [upload.single("file"), (req, res, next) => {
-        if (!req.tmpUploadFilePath){
-            cb(new Error("Missing tmp upload file path"));
-            return;
-        }
-        if (!req.body.path){
-            cb(new Error("path field missing"));
-            return;
-        }
+        let ddbPath;
+        let filePath; 
 
-        if (!req.body.path === "__body.json"){
-            cb(new Error("invalid path"));
-            return;
-        }
-
-        const ddbPath = path.join("tmp", req.id);
-        const filePath = path.join(ddbPath, req.body.path);
-        
-        // Path traversal check
-        if (filePath.indexOf(ddbPath) !== 0){
-            cb(new Error("Invalid path"));
+        try{
+            if (!req.tmpUploadFilePath){
+                throw new Error("Missing tmp upload file path");
+            }
+            if (!req.body.path){
+                throw new Error("path field missing");
+            }
+    
+            if (!req.body.path === "__body.json"){
+                throw new Error("invalid path");
+            }
+    
+            ddbPath = path.join("tmp", req.id);
+            filePath = path.join(ddbPath, req.body.path);
+            
+            // Path traversal check
+            if (filePath.indexOf(ddbPath) !== 0){
+                throw new Error("Invalid path");
+            }
+        }catch(e){
+            res.status(400).json({error: e.message});
             return;
         }
         
