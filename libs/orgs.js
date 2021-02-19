@@ -22,7 +22,8 @@ module.exports = {
                     else{
                         res.json(files.filter(f => f.isDirectory()).map(f => {
                             return {
-                                slug: f.name
+                                slug: f.name,
+                                creationDate: new Date(fs.statSync(path.join(orgDir, f.name)).ctime.getTime()).toISOString()
                                 // name: path.basename(f)
                                 // TODO: more?
                             };
